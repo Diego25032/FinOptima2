@@ -1,0 +1,2 @@
+namespace FinOptima.Domain.Entities;
+public sealed class FinancialGoal { public int Id {get;set;} public int UserId {get;set;} public string Name {get;set;}=""; public decimal TargetAmount {get;set;} public decimal CurrentAmount {get;set;} public DateTime Deadline {get;set;} public string Priority {get;set;}="Media"; public bool Completed => CurrentAmount>=TargetAmount; public decimal Progress => TargetAmount<=0?0:Math.Min(100,CurrentAmount/TargetAmount*100); }

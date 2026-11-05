@@ -1,0 +1,3 @@
+using FinOptima.Application.DTOs; using FinOptima.Application.Interfaces; using FinOptima.Domain.Enums;
+namespace FinOptima.Application.Services;
+public sealed class DashboardService(ITransactionRepository tx, IGoalRepository goals, IDebtRepository debts, IEnvelopeRepository env){ public DashboardDto Get(int userId){var ts=tx.GetByUser(userId);var e=ts.Where(t=>t.Type==TransactionType.Income).Sum(t=>t.Amount);var x=ts.Where(t=>t.Type==TransactionType.Expense).Sum(t=>t.Amount);return new DashboardDto{Income=e,Expenses=x,Goals=goals.GetByUser(userId).Count,Debts=debts.GetByUser(userId).Count,EnvelopeBalances=env.GetByUser(userId).ToDictionary(a=>a.Name,a=>a.Balance)};}}

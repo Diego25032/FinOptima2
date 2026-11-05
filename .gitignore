@@ -1,0 +1,17 @@
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.db
+*.db-shm
+*.db-wal
+
+# Secretos y exportaciones locales
+.env
+.env.*
+!.env.example
+appsettings.*.json
+!appsettings.example.json
+FinOptima_Export_*/
+FinOptima_Export_*.zip
