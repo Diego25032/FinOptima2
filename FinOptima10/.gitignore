@@ -1,0 +1,2 @@
+# Cadena de conexión local de desarrollo (la app usa localhost:5433 por defecto)
+FinOptima.Vista/conexion.txt

@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>FinOptima.Vista</RootNamespace>
+    <AssemblyName>FinOptima</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FinOptima.Entidades\FinOptima.Entidades.csproj" />
+    <ProjectReference Include="..\FinOptima.Logica\FinOptima.Logica.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="conexion.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

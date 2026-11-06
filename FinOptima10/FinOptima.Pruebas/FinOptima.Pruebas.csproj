@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>FinOptima.Pruebas</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FinOptima.Entidades\FinOptima.Entidades.csproj" />
+    <ProjectReference Include="..\FinOptima.Datos\FinOptima.Datos.csproj" />
+    <ProjectReference Include="..\FinOptima.Logica\FinOptima.Logica.csproj" />
+  </ItemGroup>
+
+</Project>

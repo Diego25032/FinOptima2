@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: finoptima-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: finoptima
+      POSTGRES_USER: finoptima
+      POSTGRES_PASSWORD: finoptima
+    ports:
+      - "5433:5432"
+    volumes:
+      - finoptima_datos:/var/lib/postgresql/data
+      - ./database/01_esquema.sql:/docker-entrypoint-initdb.d/01_esquema.sql:ro
+
+volumes:
+  finoptima_datos:

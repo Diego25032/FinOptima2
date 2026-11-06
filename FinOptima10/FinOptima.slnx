@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="FinOptima.Datos/FinOptima.Datos.csproj" />
+  <Project Path="FinOptima.Entidades/FinOptima.Entidades.csproj" />
+  <Project Path="FinOptima.Logica/FinOptima.Logica.csproj" />
+  <Project Path="FinOptima.Pruebas/FinOptima.Pruebas.csproj" />
+  <Project Path="FinOptima.Vista/FinOptima.Vista.csproj" />
+</Solution>
