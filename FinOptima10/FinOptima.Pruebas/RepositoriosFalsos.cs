@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using FinOptima.Datos.Contratos;
 using FinOptima.Datos.Respaldos;
+using FinOptima.Entidades.Consultas;
 using FinOptima.Entidades.Entidades;
 using FinOptima.Entidades.Enums;
 
 namespace FinOptima.Pruebas
 {
-    public class RepositorioUsuariosFalso : IRepositorioUsuarios
+    public class RepositorioUsuariosFalso : IRepositorioAutenticacion, IRepositorioPerfil, IRepositorioAdministracion
     {
         private List<Usuario> cuentas = new List<Usuario>();
         private int siguienteId = 1;
@@ -88,6 +89,18 @@ namespace FinOptima.Pruebas
         public void ActualizarPerfil(Usuario usuario)
         {
             Reemplazar(usuario);
+        }
+
+        public void ActualizarTema(int id, TemaVisual tema)
+        {
+            Usuario usuario = BuscarPorId(id);
+
+            if (usuario == null)
+            {
+                return;
+            }
+
+            usuario.Tema = tema;
         }
 
         public void ActualizarRolYEstado(int id, RolUsuario rol, bool activo)
@@ -236,6 +249,51 @@ namespace FinOptima.Pruebas
                 {
                     resultado.Add(movimiento);
                 }
+            }
+
+            return resultado;
+        }
+
+        public List<Movimiento> ListarFiltrados(int usuarioId, FiltroMovimientos filtro)
+        {
+            List<Movimiento> resultado = new List<Movimiento>();
+
+            foreach (Movimiento movimiento in registros)
+            {
+                if (movimiento.UsuarioId != usuarioId)
+                {
+                    continue;
+                }
+
+                if (filtro.Anio > 0 && movimiento.Fecha.Year != filtro.Anio)
+                {
+                    continue;
+                }
+
+                if (filtro.Mes > 0 && movimiento.Fecha.Month != filtro.Mes)
+                {
+                    continue;
+                }
+
+                if (filtro.Tipo != null && movimiento.Tipo != filtro.Tipo.Value)
+                {
+                    continue;
+                }
+
+                if (!string.IsNullOrWhiteSpace(filtro.Categoria) &&
+                    movimiento.Categoria.IndexOf(filtro.Categoria.Trim(), StringComparison.OrdinalIgnoreCase) < 0)
+                {
+                    continue;
+                }
+
+                if (!string.IsNullOrWhiteSpace(filtro.Texto) &&
+                    movimiento.Descripcion.IndexOf(filtro.Texto.Trim(), StringComparison.OrdinalIgnoreCase) < 0 &&
+                    movimiento.Categoria.IndexOf(filtro.Texto.Trim(), StringComparison.OrdinalIgnoreCase) < 0)
+                {
+                    continue;
+                }
+
+                resultado.Add(movimiento);
             }
 
             return resultado;
@@ -424,13 +482,15 @@ namespace FinOptima.Pruebas
         private List<Presupuesto> registros = new List<Presupuesto>();
         private int siguienteId = 1;
 
-        public List<Presupuesto> ListarPorUsuario(int usuarioId)
+        public List<Presupuesto> ListarPorPeriodo(int usuarioId, int anio, int mes)
         {
             List<Presupuesto> resultado = new List<Presupuesto>();
 
             foreach (Presupuesto presupuesto in registros)
             {
-                if (presupuesto.UsuarioId == usuarioId)
+                if (presupuesto.UsuarioId == usuarioId &&
+                    presupuesto.Anio == anio &&
+                    presupuesto.Mes == mes)
                 {
                     resultado.Add(presupuesto);
                 }
@@ -439,11 +499,13 @@ namespace FinOptima.Pruebas
             return resultado;
         }
 
-        public Presupuesto BuscarPorCategoria(int usuarioId, string categoria)
+        public Presupuesto BuscarPorCategoria(int usuarioId, int anio, int mes, string categoria)
         {
             foreach (Presupuesto presupuesto in registros)
             {
                 if (presupuesto.UsuarioId == usuarioId &&
+                    presupuesto.Anio == anio &&
+                    presupuesto.Mes == mes &&
                     presupuesto.Categoria.Equals(categoria, StringComparison.OrdinalIgnoreCase))
                 {
                     return presupuesto;
@@ -455,7 +517,7 @@ namespace FinOptima.Pruebas
 
         public int Guardar(Presupuesto presupuesto)
         {
-            Presupuesto existente = BuscarPorCategoria(presupuesto.UsuarioId, presupuesto.Categoria);
+            Presupuesto existente = BuscarPorCategoria(presupuesto.UsuarioId, presupuesto.Anio, presupuesto.Mes, presupuesto.Categoria);
 
             if (existente != null)
             {
@@ -470,16 +532,18 @@ namespace FinOptima.Pruebas
             return presupuesto.Id;
         }
 
-        public void Eliminar(int id, int usuarioId)
+        public bool Eliminar(int id, int usuarioId)
         {
             for (int posicion = 0; posicion < registros.Count; posicion = posicion + 1)
             {
                 if (registros[posicion].Id == id && registros[posicion].UsuarioId == usuarioId)
                 {
                     registros.RemoveAt(posicion);
-                    return;
+                    return true;
                 }
             }
+
+            return false;
         }
     }
 

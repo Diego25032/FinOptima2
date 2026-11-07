@@ -2,15 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using FinOptima.Entidades.Consultas;
 using FinOptima.Entidades.Entidades;
+using FinOptima.Entidades.Enums;
 using FinOptima.Logica.Composicion;
 using FinOptima.Logica.Modelos;
+using FinOptima.Logica.Utilidades;
+using FinOptima.Vista.Temas;
 using FinOptima.Vista.Utilidades;
 
 namespace FinOptima.Vista.Modulos
 {
     public class ModuloMovimientos : ModuloBase
     {
+        private ComboBox campoMes;
+        private NumericUpDown campoAnio;
+        private ComboBox campoTipo;
+        private TextBox campoCategoria;
+        private TextBox campoTexto;
         private DataGridView grilla;
         private Label etiquetaResumen;
 
@@ -22,16 +31,67 @@ namespace FinOptima.Vista.Modulos
 
         private void ConstruirInterfaz()
         {
-            Label nota = new Label();
-            nota.Text = "Registra ingresos y gastos. Cada movimiento actualiza el saldo del sobre elegido.";
-            nota.Location = new Point(Margen, 55);
-            nota.AutoSize = true;
-            nota.ForeColor = Color.FromArgb(90, 100, 115);
+            Label nota = UtilidadesVista.CrearNota(
+                "Registra ingresos y gastos. Usa los filtros para encontrar movimientos por mes, tipo, categoria o texto.",
+                Margen, 52, 900);
             Controls.Add(nota);
 
+            int fila = FilaCampo(82);
+
+            Controls.Add(UtilidadesVista.CrearEtiqueta("Mes", Margen, 82));
+            campoMes = UtilidadesVista.CrearLista(Margen, fila, 130);
+            campoMes.Items.Add("Todos");
+
+            for (int numero = 1; numero <= 12; numero = numero + 1)
+            {
+                campoMes.Items.Add(CalendarioFinanciero.NombreMes(numero));
+            }
+
+            campoMes.SelectedIndex = 0;
+            Controls.Add(campoMes);
+
+            Controls.Add(UtilidadesVista.CrearEtiqueta("Anio", Margen + 140, 82));
+            campoAnio = new NumericUpDown();
+            campoAnio.Location = new Point(Margen + 140, fila);
+            campoAnio.Width = 90;
+            campoAnio.Minimum = 2000;
+            campoAnio.Maximum = 2100;
+            campoAnio.Value = DateTime.Today.Year;
+            campoAnio.Enabled = false;
+            UtilidadesVista.EstilizarCampo(campoAnio);
+            Controls.Add(campoAnio);
+
+            Controls.Add(UtilidadesVista.CrearEtiqueta("Tipo", Margen + 250, 82));
+            campoTipo = UtilidadesVista.CrearLista(Margen + 250, fila, 130);
+            campoTipo.Items.Add("Todos");
+            campoTipo.Items.Add("Ingreso");
+            campoTipo.Items.Add("Gasto");
+            campoTipo.SelectedIndex = 0;
+            Controls.Add(campoTipo);
+
+            Controls.Add(UtilidadesVista.CrearEtiqueta("Categoria", Margen + 390, 82));
+            campoCategoria = UtilidadesVista.CrearCampo(Margen + 390, fila, 150);
+            Controls.Add(campoCategoria);
+
+            Controls.Add(UtilidadesVista.CrearEtiqueta("Texto", Margen + 550, 82));
+            campoTexto = UtilidadesVista.CrearCampo(Margen + 550, fila, 170);
+            Controls.Add(campoTexto);
+
+            Button filtrar = Boton("Filtrar", Margen + 730, fila - 4, 95);
+            filtrar.Click += AlFiltrar;
+            Controls.Add(filtrar);
+
+            Button limpiar = BotonSecundario("Limpiar", Margen + 833, fila - 4, 95);
+            limpiar.Click += AlLimpiar;
+            Controls.Add(limpiar);
+
+            int posicionGrilla = fila + 42;
+            int posicionResumen = posicionGrilla + 330;
+            int posicionBotones = posicionResumen + 34;
+
             grilla = new DataGridView();
-            grilla.Location = new Point(Margen, 85);
-            grilla.Size = new Size(900, 390);
+            grilla.Location = new Point(Margen, posicionGrilla);
+            grilla.Size = new Size(900, 320);
             grilla.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             UtilidadesVista.PrepararGrilla(grilla);
             grilla.Columns.Add("Fecha", "Fecha");
@@ -43,26 +103,30 @@ namespace FinOptima.Vista.Modulos
             Controls.Add(grilla);
 
             etiquetaResumen = new Label();
-            etiquetaResumen.Location = new Point(Margen, 482);
+            etiquetaResumen.Location = new Point(Margen, posicionResumen);
             etiquetaResumen.AutoSize = true;
-            etiquetaResumen.ForeColor = Color.FromArgb(90, 100, 115);
+            etiquetaResumen.ForeColor = TemaActual.Actual.TextoSecundario;
             Controls.Add(etiquetaResumen);
 
-            Button nuevo = Boton("Nuevo movimiento", Margen, 512, 160);
+            Button nuevo = Boton("Nuevo movimiento", Margen, posicionBotones, 160);
             nuevo.Click += AlNuevo;
             Controls.Add(nuevo);
 
-            Button editar = Boton("Editar", Margen + 170, 512, 120);
+            Button editar = Boton("Editar", Margen + 170, posicionBotones, 120);
             editar.Click += AlEditar;
             Controls.Add(editar);
 
-            Button eliminar = BotonPeligro("Eliminar", Margen + 300, 512, 120);
+            Button eliminar = BotonPeligro("Eliminar", Margen + 300, posicionBotones, 120);
             eliminar.Click += AlEliminar;
             Controls.Add(eliminar);
 
-            Button actualizar = BotonSecundario("Actualizar", Margen + 430, 512, 130);
+            Button actualizar = BotonSecundario("Actualizar", Margen + 430, posicionBotones, 130);
             actualizar.Click += AlActualizar;
             Controls.Add(actualizar);
+
+            campoMes.SelectedIndexChanged += AlCambiarMes;
+            campoAnio.ValueChanged += AlCambiarFiltro;
+            campoTipo.SelectedIndexChanged += AlCambiarFiltro;
         }
 
         private void CargarDatos()
@@ -77,7 +141,7 @@ namespace FinOptima.Vista.Modulos
                     nombresSobre[sobre.Id] = sobre.Nombre;
                 }
 
-                List<Movimiento> movimientos = Servicios.Movimientos.Listar();
+                List<Movimiento> movimientos = Servicios.Movimientos.Listar(LeerFiltro());
                 grilla.Rows.Clear();
 
                 foreach (Movimiento movimiento in movimientos)
@@ -100,12 +164,63 @@ namespace FinOptima.Vista.Modulos
                     grilla.Rows[indice].Tag = movimiento;
                 }
 
-                etiquetaResumen.Text = "Movimientos registrados: " + movimientos.Count;
+                etiquetaResumen.Text = "Movimientos encontrados: " + movimientos.Count;
             }
             catch (Exception error)
             {
                 MostrarError(error);
             }
+        }
+
+        private FiltroMovimientos LeerFiltro()
+        {
+            FiltroMovimientos filtro = new FiltroMovimientos();
+
+            if (campoMes.SelectedIndex > 0)
+            {
+                filtro.Mes = campoMes.SelectedIndex;
+                filtro.Anio = (int)campoAnio.Value;
+            }
+
+            if (campoTipo.SelectedIndex == 1)
+            {
+                filtro.Tipo = TipoMovimiento.Ingreso;
+            }
+
+            if (campoTipo.SelectedIndex == 2)
+            {
+                filtro.Tipo = TipoMovimiento.Gasto;
+            }
+
+            filtro.Categoria = campoCategoria.Text.Trim();
+            filtro.Texto = campoTexto.Text.Trim();
+            return filtro;
+        }
+
+        private void AlCambiarMes(object remitente, EventArgs argumentos)
+        {
+            campoAnio.Enabled = campoMes.SelectedIndex > 0;
+            CargarDatos();
+        }
+
+        private void AlCambiarFiltro(object remitente, EventArgs argumentos)
+        {
+            CargarDatos();
+        }
+
+        private void AlFiltrar(object remitente, EventArgs argumentos)
+        {
+            CargarDatos();
+        }
+
+        private void AlLimpiar(object remitente, EventArgs argumentos)
+        {
+            campoMes.SelectedIndex = 0;
+            campoAnio.Value = DateTime.Today.Year;
+            campoTipo.SelectedIndex = 0;
+            campoCategoria.Text = "";
+            campoTexto.Text = "";
+            CargarDatos();
         }
 
         private void AlNuevo(object remitente, EventArgs argumentos)

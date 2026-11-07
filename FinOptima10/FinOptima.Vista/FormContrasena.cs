@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using FinOptima.Logica.Composicion;
 using FinOptima.Logica.Modelos;
+using FinOptima.Vista.Temas;
 using FinOptima.Vista.Utilidades;
 
 namespace FinOptima.Vista
@@ -23,13 +24,10 @@ namespace FinOptima.Vista
         private void ConstruirInterfaz()
         {
             Text = "Cambiar contrasena";
-            StartPosition = FormStartPosition.CenterParent;
-            ClientSize = new Size(470, 330);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
-            BackColor = Color.White;
-            Font = new Font("Segoe UI", 10);
+            ClientSize = new Size(470, 330);
 
             Controls.Add(UtilidadesVista.CrearEtiqueta("Contrasena actual", 24, 20));
             campoActual = UtilidadesVista.CrearCampo(24, 42, 408);
@@ -46,23 +44,21 @@ namespace FinOptima.Vista
             campoConfirmacion.PasswordChar = '*';
             Controls.Add(campoConfirmacion);
 
-            Label nota = new Label();
-            nota.Text = "Minimo 8 caracteres, al menos un numero y sin espacios.";
-            nota.Location = new Point(24, 200);
-            nota.AutoSize = true;
-            nota.ForeColor = Color.FromArgb(90, 100, 115);
-            Controls.Add(nota);
+            Controls.Add(UtilidadesVista.CrearNota("Minimo 8 caracteres, al menos un numero y sin espacios.", 24, 200, 408));
 
-            Button guardar = UtilidadesVista.CrearBoton("Cambiar", 24, 240, 190, 38, Color.FromArgb(47, 111, 237));
+            Button guardar = UtilidadesVista.CrearBoton("Cambiar", 24, 240, 190, 38, TemaActual.Acento);
             guardar.Click += AlGuardar;
             Controls.Add(guardar);
 
-            Button cancelar = UtilidadesVista.CrearBoton("Cancelar", 244, 240, 190, 38, Color.FromArgb(90, 100, 115));
+            Button cancelar = UtilidadesVista.CrearBotonSecundario("Cancelar", 244, 240, 190, 38);
             cancelar.Click += AlCancelar;
             Controls.Add(cancelar);
 
             AcceptButton = guardar;
             CancelButton = cancelar;
+
+            UtilidadesVista.PrepararFormulario(this);
+            UtilidadesVista.EstilizarCampos(this);
         }
 
         private void AlGuardar(object remitente, EventArgs argumentos)

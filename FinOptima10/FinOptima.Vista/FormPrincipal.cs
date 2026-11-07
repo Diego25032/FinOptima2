@@ -5,6 +5,7 @@ using FinOptima.Entidades.Enums;
 using FinOptima.Logica.Composicion;
 using FinOptima.Logica.Modelos;
 using FinOptima.Vista.Modulos;
+using FinOptima.Vista.Temas;
 using FinOptima.Vista.Utilidades;
 
 namespace FinOptima.Vista
@@ -15,8 +16,11 @@ namespace FinOptima.Vista
         private Panel panelContenido;
         private Panel panelMenu;
         private Label etiquetaUsuario;
+        private ComboBox selectorTema;
         private NotifyIcon iconoNotificacion;
         private bool cerroSesion;
+        private bool cargandoTema;
+        private string claveModuloActual;
 
         public bool CerroSesion
         {
@@ -33,28 +37,32 @@ namespace FinOptima.Vista
                 throw new InvalidOperationException("No hay una sesion activa.");
             }
 
+            claveModuloActual = "inicio";
+            cargandoTema = false;
+            AplicarTemaActual();
             ConstruirInterfaz();
-            MostrarModulo(new ModuloDashboard(servicios));
+            MostrarModuloPorClave(claveModuloActual);
             PrepararNotificaciones();
         }
 
         private void ConstruirInterfaz()
         {
+            Tema tema = TemaActual.Actual;
+
             Text = "FinOptima - " + servicios.Sesion.Usuario.NombreCompleto;
             StartPosition = FormStartPosition.CenterScreen;
             WindowState = FormWindowState.Maximized;
-            MinimumSize = new Size(1000, 650);
-            BackColor = Color.FromArgb(244, 246, 249);
-            Font = new Font("Segoe UI", servicios.Sesion.Usuario.TamanoFuente);
+            MinimumSize = new Size(1200, 720);
+            BackColor = tema.Fondo;
+            Font = new Font("Segoe UI", UtilidadesVista.TamanoFuenteSeguro(servicios.Sesion.Usuario.TamanoFuente));
 
             Panel cabecera = new Panel();
             cabecera.Dock = DockStyle.Top;
-            cabecera.Height = 64;
-            cabecera.BackColor = Color.FromArgb(18, 32, 47);
+            cabecera.BackColor = tema.Cabecera;
 
             Label titulo = new Label();
             titulo.Text = "FINOPTIMA";
-            titulo.ForeColor = Color.White;
+            titulo.ForeColor = tema.CabeceraTexto;
             titulo.Font = new Font("Segoe UI", 17, FontStyle.Bold);
             titulo.Location = new Point(22, 8);
             titulo.AutoSize = true;
@@ -62,42 +70,76 @@ namespace FinOptima.Vista
 
             Label subtitulo = new Label();
             subtitulo.Text = "Metodo de los 7 sobres";
-            subtitulo.ForeColor = Color.FromArgb(170, 185, 205);
+            subtitulo.ForeColor = tema.CabeceraSuave;
             subtitulo.Font = new Font("Segoe UI", 8);
-            subtitulo.Location = new Point(25, 38);
             subtitulo.AutoSize = true;
+            subtitulo.Location = new Point(25, titulo.Bottom + 2);
             cabecera.Controls.Add(subtitulo);
 
-            etiquetaUsuario = new Label();
-            etiquetaUsuario.Text = servicios.Sesion.Usuario.NombreCompleto + "  |  " + NombreRol();
-            etiquetaUsuario.ForeColor = Color.White;
-            etiquetaUsuario.Font = new Font("Segoe UI", 10);
-            etiquetaUsuario.AutoSize = true;
-            etiquetaUsuario.Margin = new Padding(0, 24, 14, 0);
+            int altoCabecera = subtitulo.Bottom + 10;
+            cabecera.Height = altoCabecera;
 
-            Button salir = UtilidadesVista.CrearBoton("Cerrar sesion", 0, 15, 130, 34, Color.FromArgb(178, 60, 60));
-            salir.Margin = new Padding(0, 15, 0, 0);
+            string nombreVisible = servicios.Sesion.Usuario.NombreCompleto + "  |  " + NombreRol();
+            int anchoNombre = AnchoDelNombre(nombreVisible);
+
+            etiquetaUsuario = new Label();
+            etiquetaUsuario.Text = nombreVisible;
+            etiquetaUsuario.ForeColor = tema.CabeceraTexto;
+            etiquetaUsuario.Font = new Font("Segoe UI", 10);
+            etiquetaUsuario.AutoSize = false;
+            etiquetaUsuario.AutoEllipsis = true;
+            etiquetaUsuario.TextAlign = ContentAlignment.MiddleLeft;
+            etiquetaUsuario.Width = anchoNombre;
+            etiquetaUsuario.Height = 26;
+
+            selectorTema = UtilidadesVista.CrearLista(0, 0, 180);
+            selectorTema.DisplayMember = "Etiqueta";
+
+            cargandoTema = true;
+
+            foreach (Tema disponible in CatalogoTemas.Listar())
+            {
+                selectorTema.Items.Add(disponible);
+            }
+
+            selectorTema.SelectedIndex = IndiceDelTema(servicios.Sesion.Usuario.Tema);
+            cargandoTema = false;
+            selectorTema.SelectedIndexChanged += AlCambiarTema;
+
+            Button salir = UtilidadesVista.CrearBotonPeligro("Cerrar sesion", 0, 0, 130, 34);
             salir.Click += AlCerrarSesion;
 
-            FlowLayoutPanel panelDerecha = new FlowLayoutPanel();
+            int margenLateral = 16;
+            int anchoTema = 180;
+            int anchoSalir = 130;
+            int anchoPanelDerecha = margenLateral + anchoNombre + 16 + anchoTema + 16 + anchoSalir + margenLateral;
+
+            Panel panelDerecha = new Panel();
             panelDerecha.Dock = DockStyle.Right;
-            panelDerecha.Width = 430;
-            panelDerecha.FlowDirection = FlowDirection.RightToLeft;
-            panelDerecha.WrapContents = false;
-            panelDerecha.BackColor = Color.FromArgb(18, 32, 47);
-            panelDerecha.Controls.Add(salir);
+            panelDerecha.Width = anchoPanelDerecha;
+            panelDerecha.BackColor = tema.Cabecera;
+
+            int centroEtiqueta = (altoCabecera - 26) / 2;
+            int centroBoton = (altoCabecera - 34) / 2;
+
+            etiquetaUsuario.Location = new Point(margenLateral, centroEtiqueta);
+            salir.Location = new Point(anchoPanelDerecha - margenLateral - anchoSalir, centroBoton);
+            selectorTema.Location = new Point(salir.Left - 16 - anchoTema, centroEtiqueta);
+
             panelDerecha.Controls.Add(etiquetaUsuario);
+            panelDerecha.Controls.Add(selectorTema);
+            panelDerecha.Controls.Add(salir);
             cabecera.Controls.Add(panelDerecha);
 
             panelMenu = new Panel();
             panelMenu.Dock = DockStyle.Left;
             panelMenu.Width = 215;
-            panelMenu.BackColor = Color.FromArgb(24, 40, 58);
+            panelMenu.BackColor = tema.Menu;
             panelMenu.AutoScroll = true;
 
             panelContenido = new Panel();
             panelContenido.Dock = DockStyle.Fill;
-            panelContenido.BackColor = Color.FromArgb(244, 246, 249);
+            panelContenido.BackColor = tema.Fondo;
 
             int posicion = 12;
             AgregarBotonMenu("Inicio", "inicio", posicion);
@@ -109,8 +151,6 @@ namespace FinOptima.Vista
             AgregarBotonMenu("Metas", "metas", posicion);
             posicion = posicion + 40;
             AgregarBotonMenu("Deudas", "deudas", posicion);
-            posicion = posicion + 40;
-            AgregarBotonMenu("Optimizacion", "optimizacion", posicion);
             posicion = posicion + 40;
             AgregarBotonMenu("Analisis mensual", "analisis", posicion);
             posicion = posicion + 40;
@@ -135,9 +175,11 @@ namespace FinOptima.Vista
             }
 
             StatusStrip barraEstado = new StatusStrip();
-            barraEstado.BackColor = Color.FromArgb(230, 234, 240);
+            barraEstado.BackColor = tema.SuperficieAlterna;
+            barraEstado.SizingGrip = false;
             ToolStripStatusLabel estado = new ToolStripStatusLabel();
             estado.Text = "Datos guardados en PostgreSQL";
+            estado.ForeColor = tema.Texto;
             barraEstado.Items.Add(estado);
 
             Controls.Add(panelContenido);
@@ -157,8 +199,8 @@ namespace FinOptima.Vista
             boton.TextAlign = ContentAlignment.MiddleLeft;
             boton.FlatStyle = FlatStyle.Flat;
             boton.FlatAppearance.BorderSize = 0;
-            boton.BackColor = Color.FromArgb(24, 40, 58);
-            boton.ForeColor = Color.FromArgb(220, 228, 240);
+            boton.BackColor = TemaActual.Actual.Menu;
+            boton.ForeColor = TemaActual.Actual.MenuTexto;
             boton.Font = new Font("Segoe UI", 10);
             boton.Cursor = Cursors.Hand;
             boton.Click += AlElegirModulo;
@@ -170,6 +212,16 @@ namespace FinOptima.Vista
             Button boton = (Button)remitente;
             string clave = (string)boton.Tag;
 
+            if (clave != "administracion")
+            {
+                claveModuloActual = clave;
+            }
+
+            MostrarModuloPorClave(clave);
+        }
+
+        private void MostrarModuloPorClave(string clave)
+        {
             try
             {
                 if (clave == "inicio")
@@ -191,10 +243,6 @@ namespace FinOptima.Vista
                 else if (clave == "deudas")
                 {
                     MostrarModulo(new ModuloDeudas(servicios));
-                }
-                else if (clave == "optimizacion")
-                {
-                    MostrarModulo(new ModuloOptimizacion(servicios));
                 }
                 else if (clave == "analisis")
                 {
@@ -253,7 +301,130 @@ namespace FinOptima.Vista
 
         private void AlCambiarPerfil(object remitente, EventArgs argumentos)
         {
-            etiquetaUsuario.Text = servicios.Sesion.Usuario.NombreCompleto + "  |  " + NombreRol();
+            if (IsHandleCreated)
+            {
+                BeginInvoke(new Action(ReconstruirInterfaz));
+            }
+        }
+
+        private void AlCambiarTema(object remitente, EventArgs argumentos)
+        {
+            if (cargandoTema)
+            {
+                return;
+            }
+
+            Tema seleccionado = selectorTema.SelectedItem as Tema;
+
+            if (seleccionado == null)
+            {
+                return;
+            }
+
+            try
+            {
+                Resultado resultado = servicios.Perfil.GuardarTema(seleccionado.Visual);
+
+                if (!resultado.Exito)
+                {
+                    UtilidadesVista.AvisarError(resultado.Mensaje);
+                    RestablecerSelector();
+                    return;
+                }
+
+                TemaActual.Cambiar(seleccionado);
+                TemaActual.Acento = UtilidadesVista.ColorDesdeTexto(servicios.Sesion.Usuario.ColorAcento);
+
+                if (IsHandleCreated)
+                {
+                    BeginInvoke(new Action(ReconstruirInterfaz));
+                }
+            }
+            catch (Exception error)
+            {
+                UtilidadesVista.AvisarError(error.Message);
+                RestablecerSelector();
+            }
+        }
+
+        private void RestablecerSelector()
+        {
+            if (selectorTema == null)
+            {
+                return;
+            }
+
+            cargandoTema = true;
+            selectorTema.SelectedIndex = IndiceDelTema(servicios.Sesion.Usuario.Tema);
+            cargandoTema = false;
+        }
+
+        private int IndiceDelTema(TemaVisual visual)
+        {
+            for (int i = 0; i < selectorTema.Items.Count; i++)
+            {
+                Tema tema = (Tema)selectorTema.Items[i];
+
+                if (tema.Visual == visual)
+                {
+                    return i;
+                }
+            }
+
+            return 0;
+        }
+
+        private void AplicarTemaActual()
+        {
+            TemaActual.Cambiar(servicios.Sesion.Usuario.Tema);
+            TemaActual.Acento = UtilidadesVista.ColorDesdeTexto(servicios.Sesion.Usuario.ColorAcento);
+        }
+
+        private void ReconstruirInterfaz()
+        {
+            if (!IsHandleCreated)
+            {
+                return;
+            }
+
+            SuspendLayout();
+            LimpiarControles();
+            AplicarTemaActual();
+            ConstruirInterfaz();
+            MostrarModuloPorClave(claveModuloActual);
+            ResumeLayout(true);
+        }
+
+        private void LimpiarControles()
+        {
+            while (Controls.Count > 0)
+            {
+                Control control = Controls[0];
+                Controls.RemoveAt(0);
+                control.Dispose();
+            }
+        }
+
+        private int AnchoDelNombre(string texto)
+        {
+            int ancho;
+
+            using (Font fuente = new Font("Segoe UI", 10))
+            {
+                ancho = TextRenderer.MeasureText(texto, fuente).Width + 10;
+            }
+
+            if (ancho < 180)
+            {
+                ancho = 180;
+            }
+
+            if (ancho > 320)
+            {
+                ancho = 320;
+            }
+
+            return ancho;
         }
 
         private void AlCerrarSesion(object remitente, EventArgs argumentos)

@@ -4,6 +4,8 @@ using System.Windows.Forms;
 using FinOptima.Entidades.Entidades;
 using FinOptima.Logica.Composicion;
 using FinOptima.Logica.Modelos;
+using FinOptima.Logica.Utilidades;
+using FinOptima.Vista.Temas;
 using FinOptima.Vista.Utilidades;
 
 namespace FinOptima.Vista
@@ -14,11 +16,16 @@ namespace FinOptima.Vista
         private PresupuestoResumen resumenEditado;
         private TextBox campoCategoria;
         private NumericUpDown campoLimite;
+        private Label etiquetaPeriodo;
+        private int anio;
+        private int mes;
 
-        public FormPresupuesto(FabricaServicios fabrica, PresupuestoResumen resumen)
+        public FormPresupuesto(FabricaServicios fabrica, PresupuestoResumen resumen, int anioPeriodo, int mesPeriodo)
         {
             servicios = fabrica;
             resumenEditado = resumen;
+            anio = anioPeriodo;
+            mes = mesPeriodo;
             ConstruirInterfaz();
             CargarDatos();
         }
@@ -26,13 +33,10 @@ namespace FinOptima.Vista
         private void ConstruirInterfaz()
         {
             Text = "Presupuesto";
-            StartPosition = FormStartPosition.CenterParent;
-            ClientSize = new Size(470, 250);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
-            BackColor = Color.White;
-            Font = new Font("Segoe UI", 10);
+            ClientSize = new Size(470, 300);
 
             Controls.Add(UtilidadesVista.CrearEtiqueta("Categoria de gasto", 24, 20));
             campoCategoria = UtilidadesVista.CrearCampo(24, 42, 408);
@@ -45,38 +49,44 @@ namespace FinOptima.Vista
             campoLimite.DecimalPlaces = 2;
             campoLimite.Maximum = 1000000000;
             campoLimite.Increment = 10000;
+            UtilidadesVista.AplicarEstiloCampo(campoLimite);
             Controls.Add(campoLimite);
 
-            Label nota = new Label();
-            nota.Text = "El limite se compara con los gastos del mes actual en esa categoria.";
-            nota.Location = new Point(24, 145);
-            nota.AutoSize = true;
-            nota.ForeColor = Color.FromArgb(90, 100, 115);
-            Controls.Add(nota);
+            etiquetaPeriodo = UtilidadesVista.CrearEtiqueta("Periodo", 24, 138);
+            etiquetaPeriodo.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            etiquetaPeriodo.ForeColor = TemaActual.Actual.Texto;
+            Controls.Add(etiquetaPeriodo);
 
-            Button guardar = UtilidadesVista.CrearBoton("Guardar", 24, 180, 190, 38, Color.FromArgb(47, 111, 237));
+            Controls.Add(UtilidadesVista.CrearNota("El limite se compara con los gastos de ese mes en esa categoria.", 24, 170, 408));
+
+            Button guardar = UtilidadesVista.CrearBoton("Guardar", 24, 225, 190, 38, TemaActual.Acento);
             guardar.Click += AlGuardar;
             Controls.Add(guardar);
 
-            Button cancelar = UtilidadesVista.CrearBoton("Cancelar", 244, 180, 190, 38, Color.FromArgb(90, 100, 115));
+            Button cancelar = UtilidadesVista.CrearBotonSecundario("Cancelar", 244, 225, 190, 38);
             cancelar.Click += AlCancelar;
             Controls.Add(cancelar);
 
             AcceptButton = guardar;
             CancelButton = cancelar;
+
+            UtilidadesVista.PrepararFormulario(this);
+            UtilidadesVista.EstilizarCampos(this);
         }
 
         private void CargarDatos()
         {
-            if (resumenEditado == null)
+            if (resumenEditado != null)
             {
-                return;
+                anio = resumenEditado.Anio;
+                mes = resumenEditado.Mes;
+                campoCategoria.Text = resumenEditado.Categoria;
+                campoCategoria.ReadOnly = true;
+                campoLimite.Value = resumenEditado.Limite;
+                Text = "Editar presupuesto";
             }
 
-            campoCategoria.Text = resumenEditado.Categoria;
-            campoCategoria.ReadOnly = true;
-            campoLimite.Value = resumenEditado.Limite;
-            Text = "Editar presupuesto";
+            etiquetaPeriodo.Text = "Periodo: " + CalendarioFinanciero.NombreMes(mes) + " " + anio;
         }
 
         private void AlGuardar(object remitente, EventArgs argumentos)
@@ -92,6 +102,8 @@ namespace FinOptima.Vista
 
                 presupuesto.Categoria = campoCategoria.Text;
                 presupuesto.Limite = campoLimite.Value;
+                presupuesto.Anio = anio;
+                presupuesto.Mes = mes;
 
                 Resultado resultado = servicios.Presupuestos.Guardar(presupuesto);
 

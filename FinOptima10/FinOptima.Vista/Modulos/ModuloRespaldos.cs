@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using FinOptima.Logica.Composicion;
 using FinOptima.Logica.Modelos;
+using FinOptima.Vista.Temas;
 using FinOptima.Vista.Utilidades;
 
 namespace FinOptima.Vista.Modulos
@@ -18,52 +19,51 @@ namespace FinOptima.Vista.Modulos
 
         private void ConstruirInterfaz()
         {
-            Label nota = new Label();
-            nota.Text = "Guarda o restaura tus sobres, movimientos, metas y deudas en un archivo JSON.";
-            nota.Location = new Point(Margen, 55);
-            nota.AutoSize = true;
-            nota.ForeColor = Color.FromArgb(90, 100, 115);
-            Controls.Add(nota);
+            Controls.Add(UtilidadesVista.CrearNota("Guarda o restaura tus sobres, movimientos, metas y deudas en un archivo JSON.", Margen, 55, 880));
 
-            Panel tarjetaExportar = UtilidadesVista.CrearTarjeta("Exportar copia de seguridad", Margen, 100, 400, 190, Acento);
+            Panel tarjetaExportar = UtilidadesVista.CrearTarjeta("Exportar copia de seguridad", Margen, 100, 400, 200, Acento);
             Controls.Add(tarjetaExportar);
 
             Label detalleExportar = new Label();
             detalleExportar.Text = "Crea un archivo con toda tu informacion financiera. Guardalo en un lugar seguro.";
             detalleExportar.Location = new Point(12, 65);
-            detalleExportar.Size = new Size(370, 40);
-            detalleExportar.ForeColor = Color.FromArgb(90, 100, 115);
+            detalleExportar.AutoSize = true;
+            detalleExportar.MaximumSize = new Size(370, 0);
+            detalleExportar.ForeColor = TemaActual.Actual.TextoSecundario;
             tarjetaExportar.Controls.Add(detalleExportar);
 
-            Button exportar = UtilidadesVista.CrearBoton("Exportar JSON", 12, 130, 180, 34, Acento);
+            Button exportar = UtilidadesVista.CrearBoton("Exportar JSON", 12, 148, 180, 34, Acento);
             exportar.Click += AlExportar;
             tarjetaExportar.Controls.Add(exportar);
 
-            Panel tarjetaImportar = UtilidadesVista.CrearTarjeta("Restaurar copia de seguridad", Margen + 430, 100, 400, 190, Color.FromArgb(178, 60, 60));
+            Panel tarjetaImportar = UtilidadesVista.CrearTarjeta("Restaurar copia de seguridad", Margen + 430, 100, 400, 200, TemaActual.Actual.Peligro);
             Controls.Add(tarjetaImportar);
 
             Label detalleImportar = new Label();
             detalleImportar.Text = "Reemplaza tus sobres, movimientos, metas y deudas por los del archivo.";
             detalleImportar.Location = new Point(12, 65);
-            detalleImportar.Size = new Size(370, 40);
-            detalleImportar.ForeColor = Color.FromArgb(90, 100, 115);
+            detalleImportar.AutoSize = true;
+            detalleImportar.MaximumSize = new Size(370, 0);
+            detalleImportar.ForeColor = TemaActual.Actual.TextoSecundario;
             tarjetaImportar.Controls.Add(detalleImportar);
 
-            Button importar = UtilidadesVista.CrearBoton("Restaurar JSON", 12, 130, 180, 34, Color.FromArgb(178, 60, 60));
+            Button importar = UtilidadesVista.CrearBoton("Restaurar JSON", 12, 148, 180, 34, TemaActual.Actual.Peligro);
             importar.Click += AlImportar;
             tarjetaImportar.Controls.Add(importar);
 
             resultado = new Label();
-            resultado.Location = new Point(Margen, 320);
-            resultado.Size = new Size(800, 80);
-            resultado.ForeColor = Color.FromArgb(50, 60, 75);
+            resultado.Location = new Point(Margen, 325);
+            resultado.AutoSize = true;
+            resultado.MaximumSize = new Size(860, 0);
+            resultado.ForeColor = TemaActual.Actual.Texto;
             Controls.Add(resultado);
 
             Label aviso = new Label();
             aviso.Text = "Importante: el archivo contiene datos personales. No lo compartas.";
-            aviso.Location = new Point(Margen, 410);
+            aviso.Location = new Point(Margen, 420);
             aviso.AutoSize = true;
-            aviso.ForeColor = Color.FromArgb(178, 60, 60);
+            aviso.MaximumSize = new Size(860, 0);
+            aviso.ForeColor = TemaActual.Actual.Peligro;
             Controls.Add(aviso);
         }
 

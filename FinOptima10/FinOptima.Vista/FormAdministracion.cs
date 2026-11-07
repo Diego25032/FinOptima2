@@ -6,6 +6,7 @@ using FinOptima.Entidades.Entidades;
 using FinOptima.Entidades.Enums;
 using FinOptima.Logica.Composicion;
 using FinOptima.Logica.Modelos;
+using FinOptima.Vista.Temas;
 using FinOptima.Vista.Utilidades;
 
 namespace FinOptima.Vista
@@ -38,12 +39,15 @@ namespace FinOptima.Vista
 
         private void ConstruirInterfaz()
         {
+            Tema tema = TemaActual.Actual;
+
             Text = "Administracion";
             StartPosition = FormStartPosition.CenterParent;
             Size = new Size(960, 640);
             MinimumSize = new Size(860, 560);
-            BackColor = Color.FromArgb(244, 246, 249);
-            Font = new Font("Segoe UI", servicios.Sesion.Usuario.TamanoFuente);
+            BackColor = tema.Fondo;
+            ForeColor = tema.Texto;
+            Font = new Font("Segoe UI", UtilidadesVista.TamanoFuenteSeguro(servicios.Sesion.Usuario.TamanoFuente));
 
             TabControl pestanas = new TabControl();
             pestanas.Dock = DockStyle.Fill;
@@ -51,19 +55,20 @@ namespace FinOptima.Vista
             Controls.Add(pestanas);
 
             TabPage resumen = new TabPage("Resumen");
-            resumen.BackColor = Color.FromArgb(244, 246, 249);
+            resumen.BackColor = tema.Fondo;
             pestanas.TabPages.Add(resumen);
 
             TabPage cuentas = new TabPage("Cuentas");
-            cuentas.BackColor = Color.FromArgb(244, 246, 249);
+            cuentas.BackColor = tema.Fondo;
             pestanas.TabPages.Add(cuentas);
 
             TabPage auditoria = new TabPage("Bitacora");
-            auditoria.BackColor = Color.FromArgb(244, 246, 249);
+            auditoria.BackColor = tema.Fondo;
             pestanas.TabPages.Add(auditoria);
 
             TabPage informacion = new TabPage("Informacion");
-            informacion.BackColor = Color.FromArgb(244, 246, 249);
+            informacion.BackColor = tema.Fondo;
+            informacion.AutoScroll = true;
             pestanas.TabPages.Add(informacion);
 
             ConstruirResumen(resumen);
@@ -74,20 +79,15 @@ namespace FinOptima.Vista
 
         private void ConstruirResumen(TabPage pagina)
         {
-            Label nota = new Label();
-            nota.Text = "Estado general de las cuentas de FinOptima.";
-            nota.Location = new Point(20, 20);
-            nota.AutoSize = true;
-            nota.ForeColor = Color.FromArgb(90, 100, 115);
-            pagina.Controls.Add(nota);
+            pagina.Controls.Add(UtilidadesVista.CrearNota("Estado general de las cuentas de FinOptima.", 20, 20, 860));
 
-            valorCuentas = AgregarTarjeta(pagina, "Total de cuentas", 20, 60, Color.FromArgb(47, 111, 237));
+            valorCuentas = AgregarTarjeta(pagina, "Total de cuentas", 20, 60, TemaActual.Acento);
             valorAdministradores = AgregarTarjeta(pagina, "Administradores", 240, 60, Color.FromArgb(18, 32, 47));
-            valorUsuarios = AgregarTarjeta(pagina, "Usuarios", 460, 60, Color.FromArgb(39, 140, 92));
-            valorActivas = AgregarTarjeta(pagina, "Cuentas activas", 20, 170, Color.FromArgb(39, 140, 92));
-            valorInactivas = AgregarTarjeta(pagina, "Cuentas inactivas", 240, 170, Color.FromArgb(178, 60, 60));
+            valorUsuarios = AgregarTarjeta(pagina, "Usuarios", 460, 60, TemaActual.Actual.Exito);
+            valorActivas = AgregarTarjeta(pagina, "Cuentas activas", 20, 170, TemaActual.Actual.Exito);
+            valorInactivas = AgregarTarjeta(pagina, "Cuentas inactivas", 240, 170, TemaActual.Actual.Peligro);
 
-            Button actualizar = UtilidadesVista.CrearBoton("Actualizar", 20, 290, 150, 34, Color.FromArgb(47, 111, 237));
+            Button actualizar = UtilidadesVista.CrearBoton("Actualizar", 20, 290, 150, 34, TemaActual.Acento);
             actualizar.Click += AlActualizarResumen;
             pagina.Controls.Add(actualizar);
         }
@@ -110,12 +110,7 @@ namespace FinOptima.Vista
 
         private void ConstruirCuentas(TabPage pagina)
         {
-            Label nota = new Label();
-            nota.Text = "Puedes cambiar el rol o el estado de otras cuentas. No puedes modificar tu propia cuenta.";
-            nota.Location = new Point(20, 15);
-            nota.AutoSize = true;
-            nota.ForeColor = Color.FromArgb(90, 100, 115);
-            pagina.Controls.Add(nota);
+            pagina.Controls.Add(UtilidadesVista.CrearNota("Puedes cambiar el rol o el estado de otras cuentas. No puedes modificar tu propia cuenta.", 20, 15, 900));
 
             grillaCuentas = new DataGridView();
             grillaCuentas.Location = new Point(20, 45);
@@ -130,31 +125,26 @@ namespace FinOptima.Vista
             grillaCuentas.Columns.Add("Creada", "Fecha de creacion");
             pagina.Controls.Add(grillaCuentas);
 
-            Button rol = UtilidadesVista.CrearBoton("Cambiar rol", 20, 480, 140, 34, Color.FromArgb(47, 111, 237));
+            Button rol = UtilidadesVista.CrearBoton("Cambiar rol", 20, 480, 140, 34, TemaActual.Acento);
             rol.Click += AlCambiarRol;
             pagina.Controls.Add(rol);
 
-            Button estado = UtilidadesVista.CrearBoton("Activar o desactivar", 170, 480, 170, 34, Color.FromArgb(90, 100, 115));
+            Button estado = UtilidadesVista.CrearBotonSecundario("Activar o desactivar", 170, 480, 170, 34);
             estado.Click += AlCambiarEstado;
             pagina.Controls.Add(estado);
 
-            Button exportar = UtilidadesVista.CrearBoton("Exportar cuentas CSV", 350, 480, 180, 34, Color.FromArgb(39, 140, 92));
+            Button exportar = UtilidadesVista.CrearBoton("Exportar cuentas CSV", 350, 480, 180, 34, TemaActual.Actual.Exito);
             exportar.Click += AlExportarCuentas;
             pagina.Controls.Add(exportar);
 
-            Button actualizar = UtilidadesVista.CrearBoton("Actualizar", 540, 480, 120, 34, Color.FromArgb(90, 100, 115));
+            Button actualizar = UtilidadesVista.CrearBotonSecundario("Actualizar", 540, 480, 120, 34);
             actualizar.Click += AlActualizarCuentas;
             pagina.Controls.Add(actualizar);
         }
 
         private void ConstruirAuditoria(TabPage pagina)
         {
-            Label nota = new Label();
-            nota.Text = "Registro de los cambios administrativos recientes.";
-            nota.Location = new Point(20, 15);
-            nota.AutoSize = true;
-            nota.ForeColor = Color.FromArgb(90, 100, 115);
-            pagina.Controls.Add(nota);
+            pagina.Controls.Add(UtilidadesVista.CrearNota("Registro de los cambios administrativos recientes.", 20, 15, 900));
 
             grillaAuditoria = new DataGridView();
             grillaAuditoria.Location = new Point(20, 45);
@@ -167,7 +157,7 @@ namespace FinOptima.Vista
             grillaAuditoria.Columns.Add("Detalle", "Detalle");
             pagina.Controls.Add(grillaAuditoria);
 
-            Button actualizar = UtilidadesVista.CrearBoton("Actualizar", 20, 480, 120, 34, Color.FromArgb(90, 100, 115));
+            Button actualizar = UtilidadesVista.CrearBotonSecundario("Actualizar", 20, 480, 120, 34);
             actualizar.Click += AlActualizarAuditoria;
             pagina.Controls.Add(actualizar);
         }
@@ -176,8 +166,10 @@ namespace FinOptima.Vista
         {
             Label texto = new Label();
             texto.Location = new Point(24, 24);
-            texto.Size = new Size(860, 430);
-            texto.ForeColor = Color.FromArgb(50, 60, 75);
+            texto.AutoSize = true;
+            texto.MaximumSize = new Size(860, 0);
+            texto.ForeColor = TemaActual.Actual.Texto;
+            texto.BackColor = Color.Transparent;
             texto.Text = "Como administrador puedes gestionar las cuentas y revisar la bitacora." + Environment.NewLine + Environment.NewLine +
                           "Reglas de seguridad:" + Environment.NewLine +
                           "- Nadie puede cambiar su propio rol ni desactivar su propia cuenta." + Environment.NewLine +

@@ -6,6 +6,7 @@ using FinOptima.Entidades.Entidades;
 using FinOptima.Entidades.Enums;
 using FinOptima.Logica.Composicion;
 using FinOptima.Logica.Modelos;
+using FinOptima.Vista.Temas;
 using FinOptima.Vista.Utilidades;
 
 namespace FinOptima.Vista.Modulos
@@ -48,97 +49,99 @@ namespace FinOptima.Vista.Modulos
 
         private void ConstruirInterfaz()
         {
-            Label nota = new Label();
-            nota.Text = "Actualiza tus datos, la apariencia de la aplicacion y tus alertas.";
-            nota.Location = new Point(Margen, 55);
-            nota.AutoSize = true;
-            nota.ForeColor = Color.FromArgb(90, 100, 115);
-            Controls.Add(nota);
+            Controls.Add(UtilidadesVista.CrearNota("Actualiza tus datos, la apariencia de la aplicacion y tus alertas.", Margen, 55, 880));
 
-            Controls.Add(UtilidadesVista.CrearEtiqueta("Nombre completo", Margen, 90));
-            campoNombre = UtilidadesVista.CrearCampo(Margen, 112, 300);
+            int filaNombre = 90;
+            Controls.Add(UtilidadesVista.CrearEtiqueta("Nombre completo", Margen, filaNombre));
+            campoNombre = UtilidadesVista.CrearCampo(Margen, FilaCampo(filaNombre), 300);
             Controls.Add(campoNombre);
 
-            Label correo = UtilidadesVista.CrearEtiqueta("Correo: " + usuario.Correo, Margen, 155);
-            correo.ForeColor = Color.FromArgb(90, 100, 115);
+            int filaCuenta = FilaCampo(filaNombre) + 34;
+            Label correo = UtilidadesVista.CrearEtiqueta("Correo: " + usuario.Correo, Margen, filaCuenta);
+            correo.ForeColor = TemaActual.Actual.TextoSecundario;
             Controls.Add(correo);
 
-            Label rol = UtilidadesVista.CrearEtiqueta("Rol: " + NombreRol(), Margen, 180);
-            rol.ForeColor = Color.FromArgb(90, 100, 115);
+            Label rol = UtilidadesVista.CrearEtiqueta("Rol: " + NombreRol(), Margen, filaCuenta + 26);
+            rol.ForeColor = TemaActual.Actual.TextoSecundario;
             Controls.Add(rol);
 
-            Controls.Add(UtilidadesVista.CrearEtiqueta("Color de acento (#RRGGBB)", Margen, 215));
-            campoColor = UtilidadesVista.CrearCampo(Margen, 237, 140);
+            int filaColor = filaCuenta + 54;
+            Controls.Add(UtilidadesVista.CrearEtiqueta("Color de acento (#RRGGBB)", Margen, filaColor));
+            campoColor = UtilidadesVista.CrearCampo(Margen, FilaCampo(filaColor), 140);
             campoColor.TextChanged += AlCambiarColor;
             Controls.Add(campoColor);
 
-            muestraColor = new Panel();
-            muestraColor.Location = new Point(Margen + 155, 237);
-            muestraColor.Size = new Size(40, 24);
-            muestraColor.BorderStyle = BorderStyle.FixedSingle;
-            Controls.Add(muestraColor);
+            Panel marcoColor = new Panel();
+            marcoColor.Location = new Point(Margen + 155, FilaCampo(filaColor));
+            marcoColor.Size = new Size(42, 26);
+            marcoColor.BackColor = TemaActual.Actual.Borde;
+            Controls.Add(marcoColor);
 
-            Controls.Add(UtilidadesVista.CrearEtiqueta("Tamano de letra", Margen + 230, 215));
+            muestraColor = new Panel();
+            muestraColor.Location = new Point(1, 1);
+            muestraColor.Size = new Size(40, 24);
+            marcoColor.Controls.Add(muestraColor);
+
+            int filaFuente = FilaCampo(filaColor) + 38;
+            Controls.Add(UtilidadesVista.CrearEtiqueta("Tamano de letra (8 a 14)", Margen, filaFuente));
             campoFuente = new NumericUpDown();
-            campoFuente.Location = new Point(Margen + 230, 237);
+            campoFuente.Location = new Point(Margen, FilaCampo(filaFuente));
             campoFuente.Width = 80;
             campoFuente.Minimum = 8;
-            campoFuente.Maximum = 16;
+            campoFuente.Maximum = 14;
+            UtilidadesVista.AplicarEstiloCampo(campoFuente);
             Controls.Add(campoFuente);
 
+            int filaAlertas = FilaCampo(filaFuente) + 38;
             GroupBox grupoAlertas = new GroupBox();
             grupoAlertas.Text = "Alertas";
-            grupoAlertas.Location = new Point(Margen, 290);
+            grupoAlertas.Location = new Point(Margen, filaAlertas);
             grupoAlertas.Size = new Size(310, 150);
+            grupoAlertas.ForeColor = TemaActual.Actual.Texto;
+            grupoAlertas.BackColor = Color.Transparent;
             Controls.Add(grupoAlertas);
 
-            alertaDeudas = new CheckBox();
-            alertaDeudas.Text = "Deudas por vencer";
-            alertaDeudas.Location = new Point(16, 28);
-            alertaDeudas.AutoSize = true;
-            grupoAlertas.Controls.Add(alertaDeudas);
-
-            alertaMetas = new CheckBox();
-            alertaMetas.Text = "Metas cerca de su fecha";
-            alertaMetas.Location = new Point(16, 56);
-            alertaMetas.AutoSize = true;
-            grupoAlertas.Controls.Add(alertaMetas);
-
-            alertaPresupuesto = new CheckBox();
-            alertaPresupuesto.Text = "Presupuestos excedidos";
-            alertaPresupuesto.Location = new Point(16, 84);
-            alertaPresupuesto.AutoSize = true;
-            grupoAlertas.Controls.Add(alertaPresupuesto);
-
-            alertaSobres = new CheckBox();
-            alertaSobres.Text = "Sobres sin saldo suficiente";
-            alertaSobres.Location = new Point(16, 112);
-            alertaSobres.AutoSize = true;
-            grupoAlertas.Controls.Add(alertaSobres);
+            alertaDeudas = CrearAlerta("Deudas por vencer", 28, grupoAlertas);
+            alertaMetas = CrearAlerta("Metas cerca de su fecha", 56, grupoAlertas);
+            alertaPresupuesto = CrearAlerta("Presupuestos excedidos", 84, grupoAlertas);
+            alertaSobres = CrearAlerta("Sobres sin saldo suficiente", 112, grupoAlertas);
 
             foto = new PictureBox();
             foto.Location = new Point(Margen + 350, 90);
             foto.Size = new Size(140, 140);
             foto.BorderStyle = BorderStyle.FixedSingle;
             foto.SizeMode = PictureBoxSizeMode.Zoom;
-            foto.BackColor = Color.White;
+            foto.BackColor = TemaActual.Actual.Superficie;
             Controls.Add(foto);
 
-            Button cargarFoto = BotonSecundario("Cargar foto", Margen + 350, 240, 140);
+            Button cargarFoto = BotonSecundario("Cargar foto", Margen + 350, 242, 140);
             cargarFoto.Click += AlCargarFoto;
             Controls.Add(cargarFoto);
 
-            Button quitarFoto = BotonPeligro("Quitar foto", Margen + 350, 278, 140);
+            Button quitarFoto = BotonPeligro("Quitar foto", Margen + 350, 282, 140);
             quitarFoto.Click += AlQuitarFoto;
             Controls.Add(quitarFoto);
 
-            Button guardar = Boton("Guardar cambios", Margen, 460, 180);
+            int filaBotones = filaAlertas + 175;
+            Button guardar = Boton("Guardar cambios", Margen, filaBotones, 180);
             guardar.Click += AlGuardar;
             Controls.Add(guardar);
 
-            Button contrasena = BotonSecundario("Cambiar contrasena", Margen + 200, 460, 190);
+            Button contrasena = BotonSecundario("Cambiar contrasena", Margen + 200, filaBotones, 190);
             contrasena.Click += AlCambiarContrasena;
             Controls.Add(contrasena);
+        }
+
+        private CheckBox CrearAlerta(string texto, int y, GroupBox grupo)
+        {
+            CheckBox alerta = new CheckBox();
+            alerta.Text = texto;
+            alerta.Location = new Point(16, y);
+            alerta.AutoSize = true;
+            alerta.ForeColor = TemaActual.Actual.Texto;
+            alerta.BackColor = Color.Transparent;
+            grupo.Controls.Add(alerta);
+            return alerta;
         }
 
         private void CargarDatos()

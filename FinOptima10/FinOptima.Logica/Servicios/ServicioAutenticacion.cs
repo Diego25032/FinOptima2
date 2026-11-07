@@ -11,12 +11,12 @@ namespace FinOptima.Logica.Servicios
 {
     public class ServicioAutenticacion
     {
-        private IRepositorioUsuarios usuarios;
+        private IRepositorioAutenticacion usuarios;
         private IRepositorioSobres sobres;
         private IRepositorioActividad actividad;
         private SesionActual sesion;
 
-        public ServicioAutenticacion(IRepositorioUsuarios repositorioUsuarios, IRepositorioSobres repositorioSobres, IRepositorioActividad repositorioActividad, SesionActual sesionActual)
+        public ServicioAutenticacion(IRepositorioAutenticacion repositorioUsuarios, IRepositorioSobres repositorioSobres, IRepositorioActividad repositorioActividad, SesionActual sesionActual)
         {
             usuarios = repositorioUsuarios;
             sobres = repositorioSobres;

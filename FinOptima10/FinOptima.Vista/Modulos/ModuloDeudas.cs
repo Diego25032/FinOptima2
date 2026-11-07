@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using FinOptima.Entidades.Entidades;
 using FinOptima.Logica.Composicion;
 using FinOptima.Logica.Modelos;
+using FinOptima.Vista.Temas;
 using FinOptima.Vista.Utilidades;
 
 namespace FinOptima.Vista.Modulos
@@ -22,16 +23,14 @@ namespace FinOptima.Vista.Modulos
 
         private void ConstruirInterfaz()
         {
-            Label nota = new Label();
-            nota.Text = "Registra tus deudas y abona para reducir el saldo pendiente.";
-            nota.Location = new Point(Margen, 55);
-            nota.AutoSize = true;
-            nota.ForeColor = Color.FromArgb(90, 100, 115);
+            Label nota = UtilidadesVista.CrearNota(
+                "Registra tus deudas y abona para reducir el saldo pendiente.",
+                Margen, 55, 880);
             Controls.Add(nota);
 
             grilla = new DataGridView();
-            grilla.Location = new Point(Margen, 85);
-            grilla.Size = new Size(940, 390);
+            grilla.Location = new Point(Margen, 88);
+            grilla.Size = new Size(900, 385);
             grilla.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             UtilidadesVista.PrepararGrilla(grilla);
             grilla.Columns.Add("Acreedor", "Acreedor");
@@ -48,7 +47,7 @@ namespace FinOptima.Vista.Modulos
             total.Location = new Point(Margen, 485);
             total.AutoSize = true;
             total.Font = new Font("Segoe UI", Letra + 1, FontStyle.Bold);
-            total.ForeColor = Color.FromArgb(18, 32, 47);
+            total.ForeColor = TemaActual.Actual.Texto;
             Controls.Add(total);
 
             Button nueva = Boton("Nueva deuda", Margen, 515, 140);

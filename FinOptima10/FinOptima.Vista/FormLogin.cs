@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using FinOptima.Logica.Composicion;
 using FinOptima.Logica.Modelos;
+using FinOptima.Vista.Temas;
 using FinOptima.Vista.Utilidades;
 
 namespace FinOptima.Vista
@@ -23,74 +24,94 @@ namespace FinOptima.Vista
 
         private void ConstruirInterfaz()
         {
+            Tema tema = TemaActual.Actual;
+
             Text = "FinOptima - Iniciar sesion";
             StartPosition = FormStartPosition.CenterScreen;
-            ClientSize = new Size(520, 460);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
-            BackColor = Color.White;
+            AutoScroll = true;
+            BackColor = tema.Fondo;
+            ForeColor = tema.Texto;
             Font = new Font("Segoe UI", 10);
 
+            Font fuenteTitulo = new Font("Segoe UI", 22, FontStyle.Bold);
+            Font fuenteSubtitulo = new Font("Segoe UI", 9);
+            string textoTitulo = "FINOPTIMA";
+            string textoSubtitulo = "Finanzas personales con el metodo de los 7 sobres";
+
             Panel cabecera = new Panel();
-            cabecera.BackColor = Color.FromArgb(18, 32, 47);
+            cabecera.BackColor = tema.Cabecera;
             cabecera.Dock = DockStyle.Top;
-            cabecera.Height = 100;
             Controls.Add(cabecera);
 
             Label titulo = new Label();
-            titulo.Text = "FINOPTIMA";
-            titulo.ForeColor = Color.White;
-            titulo.Font = new Font("Segoe UI", 24, FontStyle.Bold);
-            titulo.Location = new Point(30, 20);
+            titulo.Text = textoTitulo;
+            titulo.ForeColor = tema.CabeceraTexto;
+            titulo.BackColor = Color.Transparent;
+            titulo.Font = fuenteTitulo;
+            titulo.Location = new Point(30, 14);
             titulo.AutoSize = true;
             cabecera.Controls.Add(titulo);
 
             Label subtitulo = new Label();
-            subtitulo.Text = "Finanzas personales con el metodo de los 7 sobres";
-            subtitulo.ForeColor = Color.FromArgb(200, 210, 225);
-            subtitulo.Font = new Font("Segoe UI", 9);
-            subtitulo.Location = new Point(33, 62);
+            subtitulo.Text = textoSubtitulo;
+            subtitulo.ForeColor = tema.CabeceraSuave;
+            subtitulo.BackColor = Color.Transparent;
+            subtitulo.Font = fuenteSubtitulo;
             subtitulo.AutoSize = true;
+            subtitulo.MaximumSize = new Size(440, 0);
+            subtitulo.Location = new Point(33, titulo.Bottom + 2);
             cabecera.Controls.Add(subtitulo);
 
-            Label rotuloCorreo = UtilidadesVista.CrearEtiqueta("Correo electronico", 33, 130);
+            int alturaCabecera = subtitulo.Bottom + 14;
+            cabecera.Height = alturaCabecera;
+
+            int y = alturaCabecera + 26;
+            int altoTexto = TextRenderer.MeasureText("Ag", Font).Height;
+            int altoCampo = altoTexto + 10;
+
+            Label rotuloCorreo = UtilidadesVista.CrearEtiqueta("Correo electronico", 33, y);
             Controls.Add(rotuloCorreo);
 
-            campoCorreo = UtilidadesVista.CrearCampo(33, 152, 440);
+            campoCorreo = UtilidadesVista.CrearCampo(33, y + altoTexto + 4, 440);
             campoCorreo.Text = "";
             Controls.Add(campoCorreo);
 
-            Label rotuloContrasena = UtilidadesVista.CrearEtiqueta("Contrasena", 33, 200);
+            int yRotuloContrasena = campoCorreo.Top + altoCampo + 18;
+            Label rotuloContrasena = UtilidadesVista.CrearEtiqueta("Contrasena", 33, yRotuloContrasena);
             Controls.Add(rotuloContrasena);
 
-            campoContrasena = UtilidadesVista.CrearCampo(33, 222, 440);
+            campoContrasena = UtilidadesVista.CrearCampo(33, yRotuloContrasena + altoTexto + 4, 440);
             campoContrasena.UseSystemPasswordChar = true;
             Controls.Add(campoContrasena);
 
-            Button entrar = UtilidadesVista.CrearBoton("Iniciar sesion", 33, 280, 210, 40, Color.FromArgb(47, 111, 237));
+            int yBotones = campoContrasena.Top + altoCampo + 20;
+            Button entrar = UtilidadesVista.CrearBoton("Iniciar sesion", 33, yBotones, 210, 40, TemaActual.Acento);
             entrar.Click += AlIniciarSesion;
             Controls.Add(entrar);
 
-            Button registrar = UtilidadesVista.CrearBoton("Crear cuenta", 263, 280, 210, 40, Color.FromArgb(90, 100, 115));
+            Button registrar = UtilidadesVista.CrearBotonSecundario("Crear cuenta", 263, yBotones, 210, 40);
             registrar.Click += AlCrearCuenta;
             Controls.Add(registrar);
 
+            int yEstado = yBotones + 60;
             etiquetaEstadoCon = new Label();
-            etiquetaEstadoCon.Location = new Point(33, 345);
-            etiquetaEstadoCon.Width = 440;
-            etiquetaEstadoCon.Height = 60;
-            etiquetaEstadoCon.ForeColor = Color.FromArgb(90, 100, 115);
+            etiquetaEstadoCon.Location = new Point(33, yEstado);
+            etiquetaEstadoCon.AutoSize = true;
+            etiquetaEstadoCon.MaximumSize = new Size(440, 0);
+            etiquetaEstadoCon.ForeColor = tema.TextoSecundario;
+            etiquetaEstadoCon.BackColor = Color.Transparent;
             Controls.Add(etiquetaEstadoCon);
 
-            Label nota = new Label();
-            nota.Text = "Los datos se guardan en PostgreSQL. Revisa conexion.txt si la conexion falla.";
-            nota.Location = new Point(33, 410);
-            nota.Width = 450;
-            nota.ForeColor = Color.Gray;
+            Label nota = UtilidadesVista.CrearNota("Los datos se guardan en PostgreSQL. Revisa conexion.txt si la conexion falla.", 33, yEstado + 60, 450);
             nota.Font = new Font("Segoe UI", 8);
             Controls.Add(nota);
 
             AcceptButton = entrar;
+
+            ClientSize = new Size(520, yEstado + 130);
+            MinimumSize = Size;
         }
 
         protected override void OnShown(EventArgs e)
@@ -105,12 +126,12 @@ namespace FinOptima.Vista
             {
                 servicios.ProbarConexion();
                 etiquetaEstadoCon.Text = "Conexion con PostgreSQL: correcta.";
-                etiquetaEstadoCon.ForeColor = Color.FromArgb(30, 130, 80);
+                etiquetaEstadoCon.ForeColor = TemaActual.Actual.Exito;
             }
             catch (Exception error)
             {
                 etiquetaEstadoCon.Text = "Conexion: " + error.Message;
-                etiquetaEstadoCon.ForeColor = Color.FromArgb(178, 60, 60);
+                etiquetaEstadoCon.ForeColor = TemaActual.Actual.Peligro;
             }
         }
 

@@ -23,6 +23,16 @@ namespace FinOptima.Logica.Validaciones
                 resultado.AgregarError("El limite debe ser mayor que cero.");
             }
 
+            if (presupuesto.Anio < 2000 || presupuesto.Anio > 2100)
+            {
+                resultado.AgregarError("El anio debe estar entre 2000 y 2100.");
+            }
+
+            if (presupuesto.Mes < 1 || presupuesto.Mes > 12)
+            {
+                resultado.AgregarError("El mes debe estar entre 1 y 12.");
+            }
+
             return resultado;
         }
     }

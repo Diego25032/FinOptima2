@@ -1,0 +1,162 @@
+```mermaid
+%% FinOptima - contratos de la capa Datos
+%% La capa Logica depende de estas interfaces, no de las clases Postgres.
+classDiagram
+    direction LR
+
+    class IRepositorioAutenticacion {
+        <<interface>>
+        +BuscarPorCorreo(correo) Usuario
+        +ExisteCorreo(correo, idExcluido) bool
+        +ContarTodos() int
+        +Agregar(usuario) int
+        +RegistrarIntentoFallido(id, intentos, bloqueadoHasta)
+        +ReiniciarIntentos(id)
+    }
+
+    class IRepositorioPerfil {
+        <<interface>>
+        +BuscarPorId(id) Usuario
+        +ExisteCorreo(correo, idExcluido) bool
+        +ActualizarPerfil(usuario)
+        +ActualizarTema(id, tema)
+        +ActualizarContrasena(id, hash, sal)
+    }
+
+    class IRepositorioAdministracion {
+        <<interface>>
+        +BuscarPorId(id) Usuario
+        +ListarTodos() List~Usuario~
+        +ContarAdministradoresActivos() int
+        +ActualizarRolYEstado(id, rol, activo)
+    }
+
+    class IRepositorioSobres {
+        <<interface>>
+        +ListarPorUsuario(usuarioId) List~Sobre~
+        +BuscarPorId(id, usuarioId) Sobre
+        +Agregar(sobre) int
+        +Actualizar(sobre)
+        +Eliminar(id, usuarioId)
+    }
+
+    class IRepositorioMovimientos {
+        <<interface>>
+        +ListarPorUsuario(usuarioId) List~Movimiento~
+        +ListarFiltrados(usuarioId, filtro) List~Movimiento~
+        +BuscarPorId(id, usuarioId) Movimiento
+        +Agregar(movimiento) int
+        +Actualizar(movimiento)
+        +Eliminar(id, usuarioId)
+    }
+
+    class IRepositorioMetas {
+        <<interface>>
+        +ListarPorUsuario(usuarioId) List~Meta~
+        +BuscarPorId(id, usuarioId) Meta
+        +Agregar(meta) int
+        +Actualizar(meta)
+        +Eliminar(id, usuarioId)
+    }
+
+    class IRepositorioDeudas {
+        <<interface>>
+        +ListarPorUsuario(usuarioId) List~Deuda~
+        +BuscarPorId(id, usuarioId) Deuda
+        +Agregar(deuda) int
+        +Actualizar(deuda)
+        +Eliminar(id, usuarioId)
+    }
+
+    class IRepositorioPresupuestos {
+        <<interface>>
+        +ListarPorUsuario(usuarioId) List~Presupuesto~
+        +ListarPorPeriodo(usuarioId, anio, mes) List~Presupuesto~
+        +BuscarPorCategoria(usuarioId, anio, mes, categoria) Presupuesto
+        +Guardar(presupuesto) int
+        +Eliminar(id, usuarioId) bool
+    }
+
+    class IRepositorioActividad {
+        <<interface>>
+        +Registrar(usuarioId, accion)
+        +ListarRecientes(usuarioId, limite) List~RegistroActividad~
+    }
+
+    class IRepositorioAuditoria {
+        <<interface>>
+        +Registrar(administradorId, accion, detalle)
+        +ListarRecientes(limite) List~RegistroAuditoria~
+    }
+
+    class IGeneradorReportes {
+        <<interface>>
+        +ExportarExcel(ruta, sobres, movimientos, metas, deudas)
+        +ExportarPdf(ruta, nombreUsuario, sobres, movimientos, metas, deudas)
+    }
+
+    class IExportadorCuentas {
+        <<interface>>
+        +Exportar(usuarios, ruta)
+    }
+
+    class IServicioRespaldo {
+        <<interface>>
+        +Exportar(usuarioId, correo, ruta) ResumenRespaldoDatos
+        +Importar(usuarioId, ruta) ResumenRespaldoDatos
+    }
+
+    class Usuario {
+        <<entidad>>
+    }
+    class Sobre {
+        <<entidad>>
+    }
+    class Movimiento {
+        <<entidad>>
+    }
+    class Meta {
+        <<entidad>>
+    }
+    class Deuda {
+        <<entidad>>
+    }
+    class Presupuesto {
+        <<entidad>>
+    }
+    class FiltroMovimientos {
+        <<consulta>>
+    }
+    class RegistroActividad {
+        <<entidad>>
+    }
+    class RegistroAuditoria {
+        <<entidad>>
+    }
+    class ResumenRespaldoDatos {
+        <<dto>>
+    }
+
+    IRepositorioAutenticacion ..> Usuario : devuelve
+    IRepositorioPerfil ..> Usuario : devuelve
+    IRepositorioAdministracion ..> Usuario : devuelve
+    IRepositorioSobres ..> Sobre : devuelve
+    IRepositorioMovimientos ..> Movimiento : devuelve
+    IRepositorioMovimientos ..> FiltroMovimientos : recibe
+    IRepositorioMetas ..> Meta : devuelve
+    IRepositorioDeudas ..> Deuda : devuelve
+    IRepositorioPresupuestos ..> Presupuesto : devuelve
+    IRepositorioActividad ..> RegistroActividad : devuelve
+    IRepositorioAuditoria ..> RegistroAuditoria : devuelve
+    IGeneradorReportes ..> Sobre : recibe
+    IGeneradorReportes ..> Movimiento : recibe
+    IGeneradorReportes ..> Meta : recibe
+    IGeneradorReportes ..> Deuda : recibe
+    IExportadorCuentas ..> Usuario : recibe
+    IServicioRespaldo ..> ResumenRespaldoDatos : devuelve
+
+    note for IRepositorioAutenticacion "Solo lo necesario para entrar: correo, intentos y bloqueo."
+    note for IRepositorioPerfil "Solo lo necesario para que cada persona edite su propia cuenta."
+    note for IRepositorioAdministracion "Solo lo necesario para gestionar cuentas y roles, sin datos financieros."
+    note for IServicioRespaldo "Los contratos viven en Datos para que Logica no conozca Npgsql ni los archivos JSON."
+```

@@ -1,0 +1,185 @@
+```mermaid
+%% FinOptima - modulos de la capa Vista
+classDiagram
+    direction LR
+
+    class ModuloBase {
+        #FabricaServicios Servicios
+        #Color Acento
+        #float Letra
+        #int Margen
+        +ModuloBase(servicios, titulo)
+        #MostrarResultado(resultado)
+        #MostrarError(error)
+        #Boton(texto, x, y, ancho) Button
+        #BotonSecundario(texto, x, y, ancho) Button
+        #BotonPeligro(texto, x, y, ancho) Button
+        #FilaCampo(yEtiqueta) int
+    }
+
+    class ModuloDashboard {
+        +ModuloDashboard(servicios)
+    }
+    class ModuloSobres {
+        +ModuloSobres(servicios)
+    }
+    class ModuloMovimientos {
+        +ModuloMovimientos(servicios)
+        -LeerFiltro() FiltroMovimientos
+        -AlFiltrar(remitente, argumentos)
+        -AlLimpiar(remitente, argumentos)
+    }
+    class ModuloMetas {
+        +ModuloMetas(servicios)
+    }
+    class ModuloDeudas {
+        +ModuloDeudas(servicios)
+    }
+    class ModuloAnalisis {
+        +ModuloAnalisis(servicios)
+    }
+    class ModuloSimuladores {
+        +ModuloSimuladores(servicios)
+    }
+    class ModuloPresupuestos {
+        +ModuloPresupuestos(servicios)
+        -AlCambiarPeriodo(remitente, argumentos)
+    }
+    class ModuloAlertas {
+        +ModuloAlertas(servicios)
+    }
+    class ModuloReportes {
+        +ModuloReportes(servicios)
+    }
+    class ModuloRespaldos {
+        +ModuloRespaldos(servicios)
+    }
+    class ModuloPerfil {
+        +ModuloPerfil(servicios)
+    }
+    class ModuloActividad {
+        +ModuloActividad(servicios)
+    }
+
+    class UserControl {
+        <<WinForms>>
+    }
+    class FabricaServicios {
+        <<composicion>>
+    }
+    class FormPrincipal {
+        <<formulario>>
+    }
+
+    class ServicioDashboard {
+        <<servicio>>
+    }
+    class ServicioSobres {
+        <<servicio>>
+    }
+    class ServicioMovimientos {
+        <<servicio>>
+    }
+    class ServicioMetas {
+        <<servicio>>
+    }
+    class ServicioDeudas {
+        <<servicio>>
+    }
+    class ServicioAnalisis {
+        <<servicio>>
+    }
+    class ServicioSimuladores {
+        <<servicio>>
+    }
+    class ServicioPresupuestos {
+        <<servicio>>
+    }
+    class ServicioAlertas {
+        <<servicio>>
+    }
+    class ServicioReportes {
+        <<servicio>>
+    }
+    class ServicioRespaldo {
+        <<servicio>>
+    }
+    class ServicioPerfil {
+        <<servicio>>
+    }
+    class ServicioActividad {
+        <<servicio>>
+    }
+
+    class FormSobre {
+        <<formulario>>
+    }
+    class FormMovimiento {
+        <<formulario>>
+    }
+    class FormMeta {
+        <<formulario>>
+    }
+    class FormDeuda {
+        <<formulario>>
+    }
+    class FormPresupuesto {
+        <<formulario>>
+    }
+    class FormContrasena {
+        <<formulario>>
+    }
+    class FormMonto {
+        <<formulario>>
+    }
+    class FiltroMovimientos {
+        <<consulta>>
+    }
+
+    UserControl <|-- ModuloBase
+    ModuloBase <|-- ModuloDashboard
+    ModuloBase <|-- ModuloSobres
+    ModuloBase <|-- ModuloMovimientos
+    ModuloBase <|-- ModuloMetas
+    ModuloBase <|-- ModuloDeudas
+    ModuloBase <|-- ModuloAnalisis
+    ModuloBase <|-- ModuloSimuladores
+    ModuloBase <|-- ModuloPresupuestos
+    ModuloBase <|-- ModuloAlertas
+    ModuloBase <|-- ModuloReportes
+    ModuloBase <|-- ModuloRespaldos
+    ModuloBase <|-- ModuloPerfil
+    ModuloBase <|-- ModuloActividad
+
+    ModuloBase --> FabricaServicios : recibe
+
+    ModuloDashboard ..> ServicioDashboard : usa
+    ModuloSobres ..> ServicioSobres : usa
+    ModuloMovimientos ..> ServicioMovimientos : usa
+    ModuloMovimientos ..> FiltroMovimientos : construye
+    ModuloMovimientos ..> ServicioSobres : consulta
+    ModuloMetas ..> ServicioMetas : usa
+    ModuloDeudas ..> ServicioDeudas : usa
+    ModuloAnalisis ..> ServicioAnalisis : usa
+    ModuloSimuladores ..> ServicioSimuladores : usa
+    ModuloSimuladores ..> ServicioMetas : consulta
+    ModuloSimuladores ..> ServicioDeudas : consulta
+    ModuloPresupuestos ..> ServicioPresupuestos : usa
+    ModuloAlertas ..> ServicioAlertas : usa
+    ModuloReportes ..> ServicioReportes : usa
+    ModuloRespaldos ..> ServicioRespaldo : usa
+    ModuloPerfil ..> ServicioPerfil : usa
+    ModuloActividad ..> ServicioActividad : usa
+
+    ModuloSobres ..> FormSobre : abre
+    ModuloMovimientos ..> FormMovimiento : abre
+    ModuloMetas ..> FormMeta : abre
+    ModuloMetas ..> FormMonto : abre
+    ModuloDeudas ..> FormDeuda : abre
+    ModuloDeudas ..> FormMonto : abre
+    ModuloPresupuestos ..> FormPresupuesto : abre
+    ModuloPerfil ..> FormContrasena : abre
+
+    note for ModuloBase "Todos los modulos comparten estilo, botones, tamano de letra, scroll y manejo de errores. FilaCampo separa etiqueta y campo segun la fuente."
+    note for FormPrincipal "Crea los 13 modulos segun el rol, los muestra en un panel central y abre FormAdministracion como formulario aparte."
+```

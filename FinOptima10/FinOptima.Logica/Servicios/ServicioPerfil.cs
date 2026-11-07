@@ -1,5 +1,6 @@
 using FinOptima.Datos.Contratos;
 using FinOptima.Entidades.Entidades;
+using FinOptima.Entidades.Enums;
 using FinOptima.Logica.Errores;
 using FinOptima.Logica.Modelos;
 using FinOptima.Logica.Seguridad;
@@ -9,10 +10,10 @@ namespace FinOptima.Logica.Servicios
 {
     public class ServicioPerfil
     {
-        private IRepositorioUsuarios usuarios;
+        private IRepositorioPerfil usuarios;
         private SesionActual sesion;
 
-        public ServicioPerfil(IRepositorioUsuarios repositorioUsuarios, SesionActual sesionActual)
+        public ServicioPerfil(IRepositorioPerfil repositorioUsuarios, SesionActual sesionActual)
         {
             usuarios = repositorioUsuarios;
             sesion = sesionActual;
@@ -20,7 +21,7 @@ namespace FinOptima.Logica.Servicios
 
         public Usuario ObtenerActual()
         {
-            int usuarioId = UsuarioId();
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
             Usuario usuario = usuarios.BuscarPorId(usuarioId);
 
             if (usuario == null)
@@ -41,9 +42,9 @@ namespace FinOptima.Logica.Servicios
                 validacion.AgregarError("El color debe tener el formato #RRGGBB.");
             }
 
-            if (tamanoFuente < 8 || tamanoFuente > 16)
+            if (tamanoFuente < 8 || tamanoFuente > 14)
             {
-                validacion.AgregarError("El tamano de fuente debe estar entre 8 y 16.");
+                validacion.AgregarError("El tamano de fuente debe estar entre 8 y 14.");
             }
 
             if (!validacion.EsValido)
@@ -51,7 +52,7 @@ namespace FinOptima.Logica.Servicios
                 return Resultado.Mal(validacion.Mensaje);
             }
 
-            int usuarioId = UsuarioId();
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
             Usuario usuario = usuarios.BuscarPorId(usuarioId);
 
             if (usuario == null)
@@ -72,6 +73,22 @@ namespace FinOptima.Logica.Servicios
             return Resultado.Bien("Perfil actualizado.");
         }
 
+        public Resultado GuardarTema(TemaVisual tema)
+        {
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
+            Usuario usuario = usuarios.BuscarPorId(usuarioId);
+
+            if (usuario == null)
+            {
+                return Resultado.Mal("La cuenta ya no existe.");
+            }
+
+            usuario.Tema = tema;
+            usuarios.ActualizarTema(usuarioId, tema);
+            sesion.Iniciar(usuario);
+            return Resultado.Bien("Tema actualizado.");
+        }
+
         public Resultado GuardarFoto(byte[] foto)
         {
             if (foto != null && foto.Length > 2097152)
@@ -79,7 +96,7 @@ namespace FinOptima.Logica.Servicios
                 return Resultado.Mal("La foto no puede superar 2 MB.");
             }
 
-            int usuarioId = UsuarioId();
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
             Usuario usuario = usuarios.BuscarPorId(usuarioId);
 
             if (usuario == null)
@@ -95,7 +112,7 @@ namespace FinOptima.Logica.Servicios
 
         public Resultado CambiarContrasena(string actual, string nueva, string confirmacion)
         {
-            int usuarioId = UsuarioId();
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
             Usuario usuario = usuarios.BuscarPorId(usuarioId);
 
             if (usuario == null)
@@ -157,16 +174,6 @@ namespace FinOptima.Logica.Servicios
             }
 
             return true;
-        }
-
-        private int UsuarioId()
-        {
-            if (!sesion.HaySesion)
-            {
-                throw new ErrorAplicacion("No hay una sesion activa.");
-            }
-
-            return sesion.UsuarioId;
         }
     }
 }

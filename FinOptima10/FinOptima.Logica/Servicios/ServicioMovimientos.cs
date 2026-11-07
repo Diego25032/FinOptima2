@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using FinOptima.Datos.Contratos;
+using FinOptima.Entidades.Consultas;
 using FinOptima.Entidades.Entidades;
 using FinOptima.Entidades.Enums;
-using FinOptima.Logica.Errores;
 using FinOptima.Logica.Modelos;
 using FinOptima.Logica.Validaciones;
 
@@ -23,7 +23,12 @@ namespace FinOptima.Logica.Servicios
 
         public List<Movimiento> Listar()
         {
-            return movimientos.ListarPorUsuario(UsuarioId());
+            return movimientos.ListarPorUsuario(ValidadorSesion.UsuarioId(sesion));
+        }
+
+        public List<Movimiento> Listar(FiltroMovimientos filtro)
+        {
+            return movimientos.ListarFiltrados(ValidadorSesion.UsuarioId(sesion), filtro);
         }
 
         public Resultado Guardar(Movimiento movimiento)
@@ -35,7 +40,7 @@ namespace FinOptima.Logica.Servicios
                 return Resultado.Mal(validacion.Mensaje);
             }
 
-            int usuarioId = UsuarioId();
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
 
             if (movimiento.SobreId > 0)
             {
@@ -72,7 +77,7 @@ namespace FinOptima.Logica.Servicios
 
         public Resultado Eliminar(int identificador)
         {
-            int usuarioId = UsuarioId();
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
             Movimiento movimiento = movimientos.BuscarPorId(identificador, usuarioId);
 
             if (movimiento == null)
@@ -135,16 +140,6 @@ namespace FinOptima.Logica.Servicios
             }
 
             sobres.Actualizar(sobre);
-        }
-
-        private int UsuarioId()
-        {
-            if (!sesion.HaySesion)
-            {
-                throw new ErrorAplicacion("No hay una sesion activa.");
-            }
-
-            return sesion.UsuarioId;
         }
     }
 }

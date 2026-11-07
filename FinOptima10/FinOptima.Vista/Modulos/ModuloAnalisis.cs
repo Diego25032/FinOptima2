@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using FinOptima.Logica.Composicion;
 using FinOptima.Logica.Modelos;
+using FinOptima.Vista.Temas;
 using FinOptima.Vista.Utilidades;
 
 namespace FinOptima.Vista.Modulos
@@ -30,54 +31,56 @@ namespace FinOptima.Vista.Modulos
 
         private void ConstruirInterfaz()
         {
-            Label nota = new Label();
-            nota.Text = "Compara ingresos, gastos y ahorro por categoria en cada mes.";
-            nota.Location = new Point(Margen, 55);
-            nota.AutoSize = true;
-            nota.ForeColor = Color.FromArgb(90, 100, 115);
+            Label nota = UtilidadesVista.CrearNota(
+                "Compara ingresos, gastos y ahorro por categoria en cada mes.",
+                Margen, 55, 880);
             Controls.Add(nota);
 
+            int fila = FilaCampo(85);
+
             Controls.Add(UtilidadesVista.CrearEtiqueta("Mes", Margen, 85));
-            campoMes = new ComboBox();
-            campoMes.Location = new Point(Margen, 107);
-            campoMes.Width = 180;
-            campoMes.DropDownStyle = ComboBoxStyle.DropDownList;
+            campoMes = UtilidadesVista.CrearLista(Margen, fila, 180);
             Controls.Add(campoMes);
 
             Controls.Add(UtilidadesVista.CrearEtiqueta("Anio", Margen + 200, 85));
             campoAnio = new NumericUpDown();
-            campoAnio.Location = new Point(Margen + 200, 107);
+            campoAnio.Location = new Point(Margen + 200, fila);
             campoAnio.Width = 100;
             campoAnio.Minimum = 2000;
             campoAnio.Maximum = 2100;
             campoAnio.Value = DateTime.Today.Year;
+            UtilidadesVista.EstilizarCampo(campoAnio);
             Controls.Add(campoAnio);
 
-            Button consultar = Boton("Consultar", Margen + 330, 103, 130);
+            Button consultar = Boton("Consultar", Margen + 330, fila - 4, 130);
             consultar.Click += AlConsultar;
             Controls.Add(consultar);
 
-            tarjetaIngresos = UtilidadesVista.CrearTarjeta("Ingresos del mes", Margen, 155, 200, 78, Acento);
+            int posicionTarjetas = fila + 48;
+            int posicionTitulos = posicionTarjetas + 100;
+            int posicionGrillas = posicionTitulos + 38;
+
+            tarjetaIngresos = UtilidadesVista.CrearTarjeta("Ingresos del mes", Margen, posicionTarjetas, 200, 78, Acento);
             Controls.Add(tarjetaIngresos);
 
-            tarjetaGastos = UtilidadesVista.CrearTarjeta("Gastos del mes", Margen + 215, 155, 200, 78, Color.FromArgb(178, 60, 60));
+            tarjetaGastos = UtilidadesVista.CrearTarjeta("Gastos del mes", Margen + 215, posicionTarjetas, 200, 78, TemaActual.Actual.Peligro);
             Controls.Add(tarjetaGastos);
 
-            tarjetaAhorro = UtilidadesVista.CrearTarjeta("Ahorro del mes", Margen + 430, 155, 200, 78, Color.FromArgb(39, 140, 92));
+            tarjetaAhorro = UtilidadesVista.CrearTarjeta("Ahorro del mes", Margen + 430, posicionTarjetas, 200, 78, TemaActual.Actual.Exito);
             Controls.Add(tarjetaAhorro);
 
-            tarjetaPorcentaje = UtilidadesVista.CrearTarjeta("Porcentaje de ahorro", Margen + 645, 155, 200, 78, Acento);
+            tarjetaPorcentaje = UtilidadesVista.CrearTarjeta("Porcentaje de ahorro", Margen + 645, posicionTarjetas, 200, 78, Acento);
             Controls.Add(tarjetaPorcentaje);
 
             Label tituloGastos = new Label();
             tituloGastos.Text = "Gastos por categoria";
-            tituloGastos.Location = new Point(Margen, 255);
+            tituloGastos.Location = new Point(Margen, posicionTitulos);
             tituloGastos.AutoSize = true;
             tituloGastos.Font = new Font("Segoe UI", Letra + 2, FontStyle.Bold);
-            tituloGastos.ForeColor = Color.FromArgb(18, 32, 47);
+            tituloGastos.ForeColor = TemaActual.Actual.Texto;
             Controls.Add(tituloGastos);
 
-            grillaGastos = CrearGrilla(Margen, 285, 410);
+            grillaGastos = CrearGrilla(Margen, posicionGrillas, 410);
             grillaGastos.Columns.Add("Categoria", "Categoria");
             grillaGastos.Columns.Add("Monto", "Monto");
             grillaGastos.Columns.Add("Porcentaje", "Porcentaje");
@@ -85,28 +88,30 @@ namespace FinOptima.Vista.Modulos
 
             Label tituloIngresos = new Label();
             tituloIngresos.Text = "Ingresos por categoria";
-            tituloIngresos.Location = new Point(Margen + 430, 255);
+            tituloIngresos.Location = new Point(Margen + 430, posicionTitulos);
             tituloIngresos.AutoSize = true;
             tituloIngresos.Font = new Font("Segoe UI", Letra + 2, FontStyle.Bold);
-            tituloIngresos.ForeColor = Color.FromArgb(18, 32, 47);
+            tituloIngresos.ForeColor = TemaActual.Actual.Texto;
             Controls.Add(tituloIngresos);
 
-            grillaIngresos = CrearGrilla(Margen + 430, 285, 410);
+            grillaIngresos = CrearGrilla(Margen + 430, posicionGrillas, 410);
             grillaIngresos.Columns.Add("Categoria", "Categoria");
             grillaIngresos.Columns.Add("Monto", "Monto");
             grillaIngresos.Columns.Add("Porcentaje", "Porcentaje");
             Controls.Add(grillaIngresos);
 
+            int posicionTituloMeses = posicionGrillas + 214;
+
             Label tituloMeses = new Label();
             tituloMeses.Text = "Ultimos seis meses";
-            tituloMeses.Location = new Point(Margen, 530);
+            tituloMeses.Location = new Point(Margen, posicionTituloMeses);
             tituloMeses.AutoSize = true;
             tituloMeses.Font = new Font("Segoe UI", Letra + 2, FontStyle.Bold);
-            tituloMeses.ForeColor = Color.FromArgb(18, 32, 47);
+            tituloMeses.ForeColor = TemaActual.Actual.Texto;
             Controls.Add(tituloMeses);
 
             grillaMeses = new DataGridView();
-            grillaMeses.Location = new Point(Margen, 560);
+            grillaMeses.Location = new Point(Margen, posicionTituloMeses + 34);
             grillaMeses.Size = new Size(840, 170);
             grillaMeses.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             UtilidadesVista.PrepararGrilla(grillaMeses);
@@ -122,7 +127,7 @@ namespace FinOptima.Vista.Modulos
         {
             DataGridView grilla = new DataGridView();
             grilla.Location = new Point(x, y);
-            grilla.Size = new Size(ancho, 220);
+            grilla.Size = new Size(ancho, 200);
             grilla.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             UtilidadesVista.PrepararGrilla(grilla);
             return grilla;

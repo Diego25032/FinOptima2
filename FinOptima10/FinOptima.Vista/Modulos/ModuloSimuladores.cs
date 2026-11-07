@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using FinOptima.Entidades.Entidades;
 using FinOptima.Logica.Composicion;
 using FinOptima.Logica.Modelos;
+using FinOptima.Vista.Temas;
 using FinOptima.Vista.Utilidades;
 
 namespace FinOptima.Vista.Modulos
@@ -27,11 +28,9 @@ namespace FinOptima.Vista.Modulos
 
         private void ConstruirInterfaz()
         {
-            Label nota = new Label();
-            nota.Text = "Calcula cuanto tiempo necesitas para cumplir una meta o pagar una deuda.";
-            nota.Location = new Point(Margen, 55);
-            nota.AutoSize = true;
-            nota.ForeColor = Color.FromArgb(90, 100, 115);
+            Label nota = UtilidadesVista.CrearNota(
+                "Calcula cuanto tiempo necesitas para cumplir una meta o pagar una deuda.",
+                Margen, 55, 880);
             Controls.Add(nota);
 
             GroupBox grupoAhorro = new GroupBox();
@@ -39,36 +38,36 @@ namespace FinOptima.Vista.Modulos
             grupoAhorro.Location = new Point(Margen, 90);
             grupoAhorro.Size = new Size(430, 330);
             grupoAhorro.Font = new Font("Segoe UI", Letra, FontStyle.Bold);
+            grupoAhorro.ForeColor = TemaActual.Actual.Texto;
+            grupoAhorro.BackColor = Color.Transparent;
             Controls.Add(grupoAhorro);
 
-            Label etiquetaMeta = UtilidadesVista.CrearEtiqueta("Meta", 20, 32);
+            Label etiquetaMeta = UtilidadesVista.CrearEtiqueta("Meta", 20, 30);
             grupoAhorro.Controls.Add(etiquetaMeta);
 
-            campoMeta = new ComboBox();
-            campoMeta.Location = new Point(20, 54);
-            campoMeta.Width = 380;
-            campoMeta.DropDownStyle = ComboBoxStyle.DropDownList;
+            campoMeta = UtilidadesVista.CrearLista(20, 56, 380);
             grupoAhorro.Controls.Add(campoMeta);
 
-            Label etiquetaAhorro = UtilidadesVista.CrearEtiqueta("Ahorro mensual", 20, 92);
+            Label etiquetaAhorro = UtilidadesVista.CrearEtiqueta("Ahorro mensual", 20, 98);
             grupoAhorro.Controls.Add(etiquetaAhorro);
 
             campoAhorroMensual = new NumericUpDown();
-            campoAhorroMensual.Location = new Point(20, 114);
+            campoAhorroMensual.Location = new Point(20, 124);
             campoAhorroMensual.Width = 180;
             campoAhorroMensual.DecimalPlaces = 2;
             campoAhorroMensual.Maximum = 1000000000;
             campoAhorroMensual.Increment = 10000;
+            UtilidadesVista.EstilizarCampo(campoAhorroMensual);
             grupoAhorro.Controls.Add(campoAhorroMensual);
 
-            Button simularAhorro = UtilidadesVista.CrearBoton("Simular", 220, 112, 180, 32, Acento);
+            Button simularAhorro = UtilidadesVista.CrearBoton("Simular", 220, 122, 180, 32, Acento);
             simularAhorro.Click += AlSimularAhorro;
             grupoAhorro.Controls.Add(simularAhorro);
 
             resultadoAhorro = new Label();
-            resultadoAhorro.Location = new Point(20, 160);
-            resultadoAhorro.Size = new Size(380, 140);
-            resultadoAhorro.ForeColor = Color.FromArgb(50, 60, 75);
+            resultadoAhorro.Location = new Point(20, 170);
+            resultadoAhorro.Size = new Size(380, 145);
+            resultadoAhorro.ForeColor = TemaActual.Actual.Texto;
             grupoAhorro.Controls.Add(resultadoAhorro);
 
             GroupBox grupoDeuda = new GroupBox();
@@ -76,36 +75,36 @@ namespace FinOptima.Vista.Modulos
             grupoDeuda.Location = new Point(Margen + 460, 90);
             grupoDeuda.Size = new Size(430, 330);
             grupoDeuda.Font = new Font("Segoe UI", Letra, FontStyle.Bold);
+            grupoDeuda.ForeColor = TemaActual.Actual.Texto;
+            grupoDeuda.BackColor = Color.Transparent;
             Controls.Add(grupoDeuda);
 
-            Label etiquetaDeuda = UtilidadesVista.CrearEtiqueta("Deuda", 20, 32);
+            Label etiquetaDeuda = UtilidadesVista.CrearEtiqueta("Deuda", 20, 30);
             grupoDeuda.Controls.Add(etiquetaDeuda);
 
-            campoDeuda = new ComboBox();
-            campoDeuda.Location = new Point(20, 54);
-            campoDeuda.Width = 380;
-            campoDeuda.DropDownStyle = ComboBoxStyle.DropDownList;
+            campoDeuda = UtilidadesVista.CrearLista(20, 56, 380);
             grupoDeuda.Controls.Add(campoDeuda);
 
-            Label etiquetaPago = UtilidadesVista.CrearEtiqueta("Pago mensual", 20, 92);
+            Label etiquetaPago = UtilidadesVista.CrearEtiqueta("Pago mensual", 20, 98);
             grupoDeuda.Controls.Add(etiquetaPago);
 
             campoPagoMensual = new NumericUpDown();
-            campoPagoMensual.Location = new Point(20, 114);
+            campoPagoMensual.Location = new Point(20, 124);
             campoPagoMensual.Width = 180;
             campoPagoMensual.DecimalPlaces = 2;
             campoPagoMensual.Maximum = 1000000000;
             campoPagoMensual.Increment = 10000;
+            UtilidadesVista.EstilizarCampo(campoPagoMensual);
             grupoDeuda.Controls.Add(campoPagoMensual);
 
-            Button simularDeuda = UtilidadesVista.CrearBoton("Simular", 220, 112, 180, 32, Acento);
+            Button simularDeuda = UtilidadesVista.CrearBoton("Simular", 220, 122, 180, 32, Acento);
             simularDeuda.Click += AlSimularDeuda;
             grupoDeuda.Controls.Add(simularDeuda);
 
             resultadoDeuda = new Label();
-            resultadoDeuda.Location = new Point(20, 160);
-            resultadoDeuda.Size = new Size(380, 140);
-            resultadoDeuda.ForeColor = Color.FromArgb(50, 60, 75);
+            resultadoDeuda.Location = new Point(20, 170);
+            resultadoDeuda.Size = new Size(380, 145);
+            resultadoDeuda.ForeColor = TemaActual.Actual.Texto;
             grupoDeuda.Controls.Add(resultadoDeuda);
         }
 

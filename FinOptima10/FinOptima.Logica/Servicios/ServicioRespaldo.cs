@@ -1,7 +1,7 @@
 using FinOptima.Datos.Contratos;
 using FinOptima.Datos.Respaldos;
-using FinOptima.Logica.Errores;
 using FinOptima.Logica.Modelos;
+using FinOptima.Logica.Validaciones;
 
 namespace FinOptima.Logica.Servicios
 {
@@ -20,7 +20,7 @@ namespace FinOptima.Logica.Servicios
 
         public ResumenRespaldo Exportar(string ruta)
         {
-            int usuarioId = UsuarioId();
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
             string correo = "";
 
             if (sesion.Usuario != null)
@@ -35,7 +35,7 @@ namespace FinOptima.Logica.Servicios
 
         public ResumenRespaldo Importar(string ruta)
         {
-            int usuarioId = UsuarioId();
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
             ResumenRespaldoDatos datos = respaldo.Importar(usuarioId, ruta);
             actividad.Registrar(usuarioId, "Copia de seguridad restaurada");
             return Convertir(datos);
@@ -49,16 +49,6 @@ namespace FinOptima.Logica.Servicios
             resumen.Metas = datos.Metas;
             resumen.Deudas = datos.Deudas;
             return resumen;
-        }
-
-        private int UsuarioId()
-        {
-            if (!sesion.HaySesion)
-            {
-                throw new ErrorAplicacion("No hay una sesion activa.");
-            }
-
-            return sesion.UsuarioId;
         }
     }
 }

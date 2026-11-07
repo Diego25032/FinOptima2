@@ -1,0 +1,89 @@
+```mermaid
+%% FinOptima - FabricaServicios: punto de composicion
+%% Crea repositorios, adaptadores y servicios, y los inyecta por constructor.
+classDiagram
+    direction LR
+
+    class FabricaServicios {
+        +SesionActual Sesion
+        +ProbarConexion()
+    }
+
+    class ConexionBD {
+        <<datos>>
+        +Abrir()
+        +Probar()
+    }
+
+    class SesionActual {
+        <<modelo>>
+        +int UsuarioId
+        +bool HaySesion
+    }
+
+    class ServicioAutenticacion {
+        <<servicio>>
+    }
+    class ServicioSobres {
+        <<servicio>>
+    }
+    class ServicioMovimientos {
+        <<servicio>>
+    }
+    class ServicioMetas {
+        <<servicio>>
+    }
+    class ServicioDeudas {
+        <<servicio>>
+    }
+    class ServicioPresupuestos {
+        <<servicio>>
+    }
+    class ServicioAlertas {
+        <<servicio>>
+    }
+    class ServicioDashboard {
+        <<servicio>>
+    }
+    class ServicioAnalisis {
+        <<servicio>>
+    }
+    class ServicioSimuladores {
+        <<servicio>>
+    }
+    class ServicioPerfil {
+        <<servicio>>
+    }
+    class ServicioAdministracion {
+        <<servicio>>
+    }
+    class ServicioReportes {
+        <<servicio>>
+    }
+    class ServicioRespaldo {
+        <<servicio>>
+    }
+    class ServicioActividad {
+        <<servicio>>
+    }
+
+    FabricaServicios --> ConexionBD : crea
+    FabricaServicios --> SesionActual : crea
+    FabricaServicios --> ServicioAutenticacion : crea
+    FabricaServicios --> ServicioSobres : crea
+    FabricaServicios --> ServicioMovimientos : crea
+    FabricaServicios --> ServicioMetas : crea
+    FabricaServicios --> ServicioDeudas : crea
+    FabricaServicios --> ServicioPresupuestos : crea
+    FabricaServicios --> ServicioAlertas : crea
+    FabricaServicios --> ServicioDashboard : crea
+    FabricaServicios --> ServicioAnalisis : crea
+    FabricaServicios --> ServicioSimuladores : crea
+    FabricaServicios --> ServicioPerfil : crea
+    FabricaServicios --> ServicioAdministracion : crea
+    FabricaServicios --> ServicioReportes : crea
+    FabricaServicios --> ServicioRespaldo : crea
+    FabricaServicios --> ServicioActividad : crea
+
+    note for FabricaServicios "Configurar() crea los 8 repositorios Postgres, GeneradorReportes, ExportadorCuentasCsv y ServicioRespaldoJson, y los pasa a cada servicio. La Vista nunca instancia repositorios."
+```

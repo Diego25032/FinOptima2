@@ -21,16 +21,14 @@ namespace FinOptima.Vista.Modulos
 
         private void ConstruirInterfaz()
         {
-            Label nota = new Label();
-            nota.Text = "Los porcentajes indican como se reparte el ingreso mensual entre los sobres.";
-            nota.Location = new Point(Margen, 55);
-            nota.AutoSize = true;
-            nota.ForeColor = Color.FromArgb(90, 100, 115);
+            Label nota = UtilidadesVista.CrearNota(
+                "Los porcentajes indican como se reparte el ingreso mensual entre los sobres.",
+                Margen, 55, 880);
             Controls.Add(nota);
 
             grilla = new DataGridView();
-            grilla.Location = new Point(Margen, 85);
-            grilla.Size = new Size(900, 390);
+            grilla.Location = new Point(Margen, 88);
+            grilla.Size = new Size(900, 385);
             grilla.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             UtilidadesVista.PrepararGrilla(grilla);
             grilla.Columns.Add("Nombre", "Sobre");

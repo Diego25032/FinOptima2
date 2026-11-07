@@ -1,0 +1,94 @@
+```mermaid
+%% FinOptima - paquetes (namespaces) y sus dependencias
+flowchart LR
+    subgraph vista["FinOptima.Vista"]
+        direction TB
+        VF["FinOptima.Vista\nformularios y Program"]
+        VM["FinOptima.Vista.Modulos\n13 modulos"]
+        VU["FinOptima.Vista.Utilidades\nayudas de interfaz"]
+        VT["FinOptima.Vista.Temas\nclaro, oscuro y contraste"]
+    end
+
+    subgraph logica["FinOptima.Logica"]
+        direction TB
+        LC["Composicion\nFabricaServicios"]
+        LS["Servicios\n15 servicios"]
+        LV["Validaciones\n6 validadores"]
+        LSEC["Seguridad\nhash y politicas"]
+        LU["Utilidades\ncalculos y calendario"]
+        LM["Modelos\nDTOs de resumen"]
+        LCAT["Catalogos\nsobres iniciales"]
+        LE["Errores\nErrorAplicacion"]
+    end
+
+    subgraph datos["FinOptima.Datos"]
+        direction TB
+        DC["Contratos\n11 interfaces"]
+        DR["Repositorios\n8 Postgres"]
+        DRES["Respaldos\nJSON"]
+        DREP["Reportes\nExcel y PDF"]
+        DEXP["Exportacion\nCSV"]
+        DCON["Conexion\nConexionBD"]
+        DU["Utilidades\nConvertidorDatos"]
+        DE["Errores\nbase de datos y respaldo"]
+    end
+
+    subgraph entidades["FinOptima.Entidades"]
+        direction TB
+        EE["Entidades\n8 clases"]
+        EEN["Enums\n5 enumeraciones"]
+    end
+
+    VF -->|"crea"| LC
+    VF -->|"usa"| LS
+    VF -->|"lee"| EE
+    VM -->|"usa"| LS
+    VM -->|"lee"| LM
+    VM -->|"abre"| VF
+    VF -->|"pinta con"| VT
+    VM -->|"pinta con"| VT
+    VU -->|"pinta con"| VT
+
+    LC -->|"crea"| LS
+    LC -->|"crea"| DR
+    LC -->|"crea"| DCON
+    LS -->|"usa"| DC
+    LS -->|"valida con"| LV
+    LS -->|"cifra con"| LSEC
+    LS -->|"calcula con"| LU
+    LS -->|"devuelve"| LM
+    LS -->|"lanza"| LE
+    LS -->|"lee"| EE
+    LV -->|"comprueba"| LSEC
+    LV -->|"lee"| EE
+    LU -->|"lee"| EE
+    LU -->|"arma"| LM
+    LM -->|"lee"| EE
+    LCAT -->|"crea"| EE
+
+    DC -->|"usa"| EE
+    DC -->|"devuelve"| DRES
+    DR -->|"implementa"| DC
+    DR -->|"abre"| DCON
+    DR -->|"convierte con"| DU
+    DR -->|"mapea"| EE
+    DR -->|"lanza"| DE
+    DRES -->|"abre"| DCON
+    DRES -->|"mapea"| EE
+    DREP -->|"implementa"| DC
+    DREP -->|"lee"| EE
+    DEXP -->|"implementa"| DC
+    DEXP -->|"lee"| EE
+    DU -->|"lee"| EE
+
+    EE -->|"usa"| EEN
+
+    classDef vista fill:#dbeafe,stroke:#2563eb,color:#000
+    classDef logica fill:#dcfce7,stroke:#16a34a,color:#000
+    classDef datos fill:#fef3c7,stroke:#d97706,color:#000
+    classDef entidades fill:#f3e8ff,stroke:#9333ea,color:#000
+    class VF,VM,VU,VT vista
+    class LC,LS,LV,LSEC,LU,LM,LCAT,LE logica
+    class DC,DR,DRES,DREP,DEXP,DCON,DU,DE datos
+    class EE,EEN entidades
+```

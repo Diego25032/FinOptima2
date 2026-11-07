@@ -10,7 +10,7 @@ using Npgsql;
 
 namespace FinOptima.Datos.Repositorios
 {
-    public class RepositorioUsuariosPostgres : IRepositorioUsuarios
+    public class RepositorioUsuariosPostgres : IRepositorioAutenticacion, IRepositorioPerfil, IRepositorioAdministracion
     {
         private ConexionBD conexionBD;
 
@@ -167,8 +167,8 @@ namespace FinOptima.Datos.Repositorios
             {
                 using (NpgsqlConnection conexion = conexionBD.Abrir())
                 {
-                    string sql = "insert into usuarios (nombre_completo, correo, contrasena_hash, contrasena_sal, rol, activo, intentos_fallidos, bloqueado_hasta, color_acento, tamano_fuente, alertas_deudas, alertas_metas, alertas_presupuesto, alertas_sobres, foto) " +
-                                 "values (@nombre, @correo, @hash, @sal, @rol, @activo, @intentos, @bloqueado, @color, @fuente, @alertasDeudas, @alertasMetas, @alertasPresupuesto, @alertasSobres, @foto) returning id";
+                    string sql = "insert into usuarios (nombre_completo, correo, contrasena_hash, contrasena_sal, rol, activo, intentos_fallidos, bloqueado_hasta, color_acento, tamano_fuente, tema, alertas_deudas, alertas_metas, alertas_presupuesto, alertas_sobres, foto) " +
+                                 "values (@nombre, @correo, @hash, @sal, @rol, @activo, @intentos, @bloqueado, @color, @fuente, @tema, @alertasDeudas, @alertasMetas, @alertasPresupuesto, @alertasSobres, @foto) returning id";
 
                     using (NpgsqlCommand comando = new NpgsqlCommand(sql, conexion))
                     {
@@ -182,6 +182,7 @@ namespace FinOptima.Datos.Repositorios
                         comando.Parameters.AddWithValue("@bloqueado", ConvertidorDatos.FechaONulo(usuario.BloqueadoHasta));
                         comando.Parameters.AddWithValue("@color", usuario.ColorAcento);
                         comando.Parameters.AddWithValue("@fuente", usuario.TamanoFuente);
+                        comando.Parameters.AddWithValue("@tema", ConvertidorDatos.TemaATexto(usuario.Tema));
                         comando.Parameters.AddWithValue("@alertasDeudas", usuario.AlertasDeudas);
                         comando.Parameters.AddWithValue("@alertasMetas", usuario.AlertasMetas);
                         comando.Parameters.AddWithValue("@alertasPresupuesto", usuario.AlertasPresupuesto);
@@ -244,6 +245,26 @@ namespace FinOptima.Datos.Repositorios
             catch (NpgsqlException error)
             {
                 throw new ErrorBaseDatos("No se pudo actualizar el perfil. Revisa que el correo no esté repetido.", error);
+            }
+        }
+
+        public void ActualizarTema(int id, TemaVisual tema)
+        {
+            try
+            {
+                using (NpgsqlConnection conexion = conexionBD.Abrir())
+                {
+                    using (NpgsqlCommand comando = new NpgsqlCommand("update usuarios set tema = @tema where id = @id", conexion))
+                    {
+                        comando.Parameters.AddWithValue("@tema", ConvertidorDatos.TemaATexto(tema));
+                        comando.Parameters.AddWithValue("@id", id);
+                        comando.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (NpgsqlException error)
+            {
+                throw new ErrorBaseDatos("No se pudo guardar el tema de la cuenta.", error);
             }
         }
 
@@ -344,6 +365,7 @@ namespace FinOptima.Datos.Repositorios
             usuario.CreadoEn = ConvertidorDatos.Fecha(lector["creado_en"]);
             usuario.ColorAcento = ConvertidorDatos.Texto(lector["color_acento"]);
             usuario.TamanoFuente = ConvertidorDatos.Entero(lector["tamano_fuente"]);
+            usuario.Tema = ConvertidorDatos.TextoATema(ConvertidorDatos.Texto(lector["tema"]));
             usuario.AlertasDeudas = ConvertidorDatos.Booleano(lector["alertas_deudas"]);
             usuario.AlertasMetas = ConvertidorDatos.Booleano(lector["alertas_metas"]);
             usuario.AlertasPresupuesto = ConvertidorDatos.Booleano(lector["alertas_presupuesto"]);

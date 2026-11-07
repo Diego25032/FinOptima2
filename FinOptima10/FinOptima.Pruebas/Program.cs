@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using FinOptima.Entidades.Consultas;
 using FinOptima.Entidades.Entidades;
 using FinOptima.Entidades.Enums;
 using FinOptima.Logica.Catalogos;
@@ -29,7 +30,6 @@ namespace FinOptima.Pruebas
             ProbarCatalogo();
             ProbarAutenticacion();
             ProbarServiciosFinancieros();
-            ProbarOptimizacion();
             ProbarSimuladores();
             ProbarAdministracion();
 
@@ -263,6 +263,30 @@ namespace FinOptima.Pruebas
             gastoMes.Fecha = DateTime.Today;
             servicioMovimientos.Guardar(gastoMes);
 
+            FiltroMovimientos filtroGastos = new FiltroMovimientos();
+            filtroGastos.Tipo = TipoMovimiento.Gasto;
+            filtroGastos.Anio = DateTime.Today.Year;
+            filtroGastos.Mes = DateTime.Today.Month;
+            Verificar("El filtro devuelve solo los gastos del mes", servicioMovimientos.Listar(filtroGastos).Count == 1);
+
+            FiltroMovimientos filtroCategoria = new FiltroMovimientos();
+            filtroCategoria.Categoria = "comi";
+            Verificar("El filtro por categoria ignora mayusculas", servicioMovimientos.Listar(filtroCategoria).Count == 1);
+
+            FiltroMovimientos filtroTexto = new FiltroMovimientos();
+            filtroTexto.Texto = "super";
+            Verificar("El filtro por texto busca en la descripcion", servicioMovimientos.Listar(filtroTexto).Count == 1);
+
+            int mesFiltroAnterior = DateTime.Today.Month == 1 ? 12 : DateTime.Today.Month - 1;
+            int anioFiltroAnterior = DateTime.Today.Month == 1 ? DateTime.Today.Year - 1 : DateTime.Today.Year;
+            FiltroMovimientos filtroOtroMes = new FiltroMovimientos();
+            filtroOtroMes.Anio = anioFiltroAnterior;
+            filtroOtroMes.Mes = mesFiltroAnterior;
+            Verificar("El filtro por mes no trae movimientos de otros meses", servicioMovimientos.Listar(filtroOtroMes).Count == 0);
+
+            FiltroMovimientos sinFiltros = new FiltroMovimientos();
+            Verificar("Un filtro vacio devuelve todos los movimientos", servicioMovimientos.Listar(sinFiltros).Count == 2);
+
             Meta meta = new Meta();
             meta.Nombre = "Viaje";
             meta.MontoObjetivo = 1000;
@@ -318,6 +342,27 @@ namespace FinOptima.Pruebas
             Verificar("El presupuesto calcula el disponible", resumenPresupuesto.Disponible == -50m);
             Verificar("El presupuesto calcula el porcentaje usado", Math.Abs(resumenPresupuesto.Porcentaje - 133.33m) < 0.01m);
 
+            int mesAnterior = DateTime.Today.Month == 1 ? 12 : DateTime.Today.Month - 1;
+            int anioAnterior = DateTime.Today.Month == 1 ? DateTime.Today.Year - 1 : DateTime.Today.Year;
+
+            Presupuesto presupuestoAnterior = new Presupuesto();
+            presupuestoAnterior.Categoria = "Comida";
+            presupuestoAnterior.Limite = 100;
+            presupuestoAnterior.Anio = anioAnterior;
+            presupuestoAnterior.Mes = mesAnterior;
+            servicioPresupuestos.Guardar(presupuestoAnterior);
+
+            List<PresupuestoResumen> historialAnterior = servicioPresupuestos.Listar(anioAnterior, mesAnterior);
+            Verificar("El historial guarda presupuestos de otros meses", historialAnterior.Count == 1);
+            Verificar("El presupuesto historico usa sus propios gastos", historialAnterior[0].Gastado == 0m);
+            Verificar("El mes actual no mezcla presupuestos historicos", servicioPresupuestos.Listar().Count == 1);
+
+            Presupuesto periodoInvalido = new Presupuesto();
+            periodoInvalido.Categoria = "Viajes";
+            periodoInvalido.Limite = 50;
+            periodoInvalido.Mes = 13;
+            Verificar("Se rechaza un mes invalido", !servicioPresupuestos.Guardar(periodoInvalido).Exito);
+
             ResumenDashboard tablero = servicioDashboard.Obtener();
             Verificar("El tablero suma los ingresos del mes", tablero.IngresosMes == 1000m);
             Verificar("El tablero suma los gastos del mes", tablero.GastosMes == 200m);
@@ -342,6 +387,12 @@ namespace FinOptima.Pruebas
 
             Resultado colorInvalido = servicioPerfil.GuardarPerfil("Administrador Principal", "naranja", 11, true, true, true, true);
             Verificar("Se rechaza un color de acento invalido", !colorInvalido.Exito);
+
+            Resultado fuenteExcesiva = servicioPerfil.GuardarPerfil("Administrador Principal", "#FF8800", 15, true, true, true, true);
+            Verificar("Se rechaza una fuente demasiado grande", !fuenteExcesiva.Exito);
+
+            Resultado temaGuardado = servicioPerfil.GuardarTema(TemaVisual.Oscuro);
+            Verificar("Se guarda el tema visual del perfil", temaGuardado.Exito && sesion.Usuario.Tema == TemaVisual.Oscuro);
 
             Resultado claveIncorrecta = servicioPerfil.CambiarContrasena("Mala1234", "Nueva1234", "Nueva1234");
             Verificar("Se rechaza el cambio con contrasena actual incorrecta", !claveIncorrecta.Exito);
@@ -371,57 +422,6 @@ namespace FinOptima.Pruebas
 
             Resultado eliminarUltimo = sobresUsuario.Eliminar(propios[0].Id);
             Verificar("No se puede eliminar el ultimo sobre", !eliminarUltimo.Exito);
-        }
-
-        private static void ProbarOptimizacion()
-        {
-            Console.WriteLine();
-            Console.WriteLine("-- Optimizacion --");
-
-            ServicioOptimizacion optimizacion = new ServicioOptimizacion();
-            List<RestriccionSobre> restricciones = new List<RestriccionSobre>();
-
-            restricciones.Add(CrearRestriccion(1, "Necesidades", 50, 45, 60));
-            restricciones.Add(CrearRestriccion(2, "Ahorro", 15, 10, 25));
-            restricciones.Add(CrearRestriccion(3, "Inversion", 10, 5, 20));
-            restricciones.Add(CrearRestriccion(4, "Educacion", 5, 2, 10));
-            restricciones.Add(CrearRestriccion(5, "Ocio", 5, 2, 10));
-            restricciones.Add(CrearRestriccion(6, "Generosidad", 5, 2, 10));
-            restricciones.Add(CrearRestriccion(7, "Metas", 10, 5, 20));
-
-            ResultadoOptimizacion factible = optimizacion.Optimizar(2000, restricciones);
-            Verificar("La distribucion con datos validos es factible", factible.EsFactible);
-
-            decimal sumaPorcentajes = 0;
-
-            foreach (AsignacionSobre asignacion in factible.Asignaciones)
-            {
-                sumaPorcentajes = sumaPorcentajes + asignacion.Porcentaje;
-            }
-
-            Verificar("Los porcentajes asignados suman 100", Math.Abs(sumaPorcentajes - 100m) < 0.01m);
-            Verificar("El total asignado coincide con el ingreso", Math.Abs(factible.TotalAsignado - 2000m) < 0.01m);
-
-            List<RestriccionSobre> imposibles = new List<RestriccionSobre>();
-            imposibles.Add(CrearRestriccion(1, "Uno", 60, 60, 100));
-            imposibles.Add(CrearRestriccion(2, "Dos", 50, 50, 100));
-
-            ResultadoOptimizacion minimosAltos = optimizacion.Optimizar(1000, imposibles);
-            Verificar("Los minimos que suman mas de 100 son infactibles", !minimosAltos.EsFactible);
-            Verificar("Se explica el problema de los minimos", minimosAltos.Mensaje.Contains("100%"));
-
-            List<RestriccionSobre> sinCapacidad = new List<RestriccionSobre>();
-            sinCapacidad.Add(CrearRestriccion(1, "Uno", 20, 0, 30));
-            sinCapacidad.Add(CrearRestriccion(2, "Dos", 20, 0, 30));
-
-            ResultadoOptimizacion maximosBajos = optimizacion.Optimizar(1000, sinCapacidad);
-            Verificar("Los maximos que no llegan a 100 son infactibles", !maximosBajos.EsFactible);
-
-            List<RestriccionSobre> incoherentes = new List<RestriccionSobre>();
-            incoherentes.Add(CrearRestriccion(1, "Raro", 80, 10, 50));
-
-            ResultadoOptimizacion objetivoFuera = optimizacion.Optimizar(1000, incoherentes);
-            Verificar("Un objetivo fuera de sus limites se rechaza", !objetivoFuera.EsFactible);
         }
 
         private static void ProbarSimuladores()
@@ -532,17 +532,6 @@ namespace FinOptima.Pruebas
 
             ResumenRespaldo resumenImportado = respaldo.Importar("copia.json");
             Verificar("Se importa el respaldo", resumenImportado.Movimientos == 2 && resumenImportado.Deudas == 1);
-        }
-
-        private static RestriccionSobre CrearRestriccion(int id, string nombre, decimal objetivo, decimal minimo, decimal maximo)
-        {
-            RestriccionSobre restriccion = new RestriccionSobre();
-            restriccion.Id = id;
-            restriccion.Nombre = nombre;
-            restriccion.Objetivo = objetivo;
-            restriccion.Minimo = minimo;
-            restriccion.Maximo = maximo;
-            return restriccion;
         }
 
         private static Sobre BuscarSobrePorNombre(List<Sobre> lista, string nombre)

@@ -1,7 +1,7 @@
 using System;
 using FinOptima.Datos.Contratos;
-using FinOptima.Logica.Errores;
 using FinOptima.Logica.Modelos;
+using FinOptima.Logica.Validaciones;
 
 namespace FinOptima.Logica.Servicios
 {
@@ -26,7 +26,7 @@ namespace FinOptima.Logica.Servicios
 
         public Resultado ExportarExcel(string ruta)
         {
-            int usuarioId = UsuarioId();
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
 
             try
             {
@@ -46,7 +46,7 @@ namespace FinOptima.Logica.Servicios
 
         public Resultado ExportarPdf(string ruta)
         {
-            int usuarioId = UsuarioId();
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
 
             try
             {
@@ -64,16 +64,6 @@ namespace FinOptima.Logica.Servicios
             {
                 return Resultado.Mal(error.Message);
             }
-        }
-
-        private int UsuarioId()
-        {
-            if (!sesion.HaySesion)
-            {
-                throw new ErrorAplicacion("No hay una sesion activa.");
-            }
-
-            return sesion.UsuarioId;
         }
     }
 }

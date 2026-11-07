@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using FinOptima.Datos.Contratos;
 using FinOptima.Entidades.Entidades;
-using FinOptima.Logica.Errores;
 using FinOptima.Logica.Modelos;
 using FinOptima.Logica.Validaciones;
 
@@ -20,7 +19,7 @@ namespace FinOptima.Logica.Servicios
 
         public List<Sobre> Listar()
         {
-            return sobres.ListarPorUsuario(UsuarioId());
+            return sobres.ListarPorUsuario(ValidadorSesion.UsuarioId(sesion));
         }
 
         public Resultado Guardar(Sobre sobre)
@@ -32,7 +31,7 @@ namespace FinOptima.Logica.Servicios
                 return Resultado.Mal(validacion.Mensaje);
             }
 
-            sobre.UsuarioId = UsuarioId();
+            sobre.UsuarioId = ValidadorSesion.UsuarioId(sesion);
 
             if (sobre.Id == 0)
             {
@@ -55,7 +54,7 @@ namespace FinOptima.Logica.Servicios
 
         public Resultado Eliminar(int identificador)
         {
-            int usuarioId = UsuarioId();
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
             Sobre sobre = sobres.BuscarPorId(identificador, usuarioId);
 
             if (sobre == null)
@@ -78,7 +77,7 @@ namespace FinOptima.Logica.Servicios
         {
             decimal total = 0;
 
-            foreach (Sobre sobre in sobres.ListarPorUsuario(UsuarioId()))
+            foreach (Sobre sobre in sobres.ListarPorUsuario(ValidadorSesion.UsuarioId(sesion)))
             {
                 total = total + sobre.Saldo;
             }
@@ -89,16 +88,6 @@ namespace FinOptima.Logica.Servicios
         public static decimal CalcularMonto(decimal ingreso, decimal porcentaje)
         {
             return ingreso * porcentaje / 100;
-        }
-
-        private int UsuarioId()
-        {
-            if (!sesion.HaySesion)
-            {
-                throw new ErrorAplicacion("No hay una sesion activa.");
-            }
-
-            return sesion.UsuarioId;
         }
     }
 }

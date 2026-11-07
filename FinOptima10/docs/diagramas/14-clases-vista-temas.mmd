@@ -1,0 +1,104 @@
+```mermaid
+%% FinOptima - temas visuales de la capa Vista
+%% Tema es abstracto; cada tema concreto define los colores. TemaActual guarda el tema en uso.
+classDiagram
+    direction LR
+
+    class Tema {
+        <<abstract>>
+        +string Nombre
+        +string Etiqueta
+        +TemaVisual Visual
+        +Color Fondo
+        +Color Superficie
+        +Color SuperficieAlterna
+        +Color Texto
+        +Color TextoSecundario
+        +Color Borde
+        +Color Cabecera
+        +Color CabeceraTexto
+        +Color CabeceraSuave
+        +Color Menu
+        +Color MenuTexto
+        +Color Peligro
+        +Color Exito
+        +AcentoVisible(acento) Color
+        #Brillo(color) int$
+        #Mezclar(primero, segundo, cantidad) Color$
+    }
+
+    class TemaClaro {
+        +string Nombre
+        +TemaVisual Visual
+    }
+
+    class TemaOscuro {
+        +string Nombre
+        +TemaVisual Visual
+        +AcentoVisible(acento) Color
+    }
+
+    class TemaContraste {
+        +string Nombre
+        +TemaVisual Visual
+        +AcentoVisible(acento) Color
+    }
+
+    class CatalogoTemas {
+        <<static>>
+        +Listar() List~Tema~
+        +Buscar(visual) Tema
+    }
+
+    class TemaActual {
+        <<static>>
+        +Tema Actual
+        +Color Acento
+        +Cambiar(tema)
+        +Cambiar(visual)
+    }
+
+    class TemaVisual {
+        <<enumeration>>
+        +Claro
+        +Oscuro
+        +Contraste
+    }
+
+    class UtilidadesVista {
+        <<static>>
+    }
+    class ModuloBase {
+        <<abstracta>>
+    }
+    class FormPrincipal {
+        <<formulario>>
+    }
+    class ServicioPerfil {
+        <<servicio>>
+    }
+    class IRepositorioPerfil {
+        <<interface>>
+    }
+
+    Tema <|-- TemaClaro
+    Tema <|-- TemaOscuro
+    Tema <|-- TemaContraste
+    Tema --> TemaVisual : usa
+
+    CatalogoTemas ..> Tema : crea
+    CatalogoTemas ..> TemaVisual : busca
+    TemaActual ..> Tema : guarda
+    TemaActual ..> TemaVisual : cambia
+
+    UtilidadesVista ..> TemaActual : lee colores
+    ModuloBase ..> TemaActual : lee colores
+    FormPrincipal ..> CatalogoTemas : llena el selector
+    FormPrincipal ..> TemaActual : aplica el tema
+    FormPrincipal ..> ServicioPerfil : guarda la eleccion
+    ServicioPerfil ..> IRepositorioPerfil : ActualizarTema
+
+    note for Tema "Agregar un tema nuevo solo requiere una clase que herede de Tema y registrarla en CatalogoTemas."
+    note for TemaActual "Vive en memoria mientras la aplicacion esta abierta; al reconstruir FormPrincipal se vuelve a leer del perfil."
+    note for TemaVisual "Se guarda como texto en la columna tema de la tabla usuarios."
+```

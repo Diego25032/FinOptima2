@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using FinOptima.Datos.Contratos;
 using FinOptima.Entidades.Entidades;
 using FinOptima.Entidades.Enums;
-using FinOptima.Logica.Errores;
 using FinOptima.Logica.Modelos;
 using FinOptima.Logica.Utilidades;
 using FinOptima.Logica.Validaciones;
@@ -25,17 +24,32 @@ namespace FinOptima.Logica.Servicios
 
         public List<PresupuestoResumen> Listar()
         {
-            int usuarioId = UsuarioId();
+            return Listar(DateTime.Today.Year, DateTime.Today.Month);
+        }
+
+        public List<PresupuestoResumen> Listar(int anio, int mes)
+        {
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
             List<PresupuestoResumen> resumenes = new List<PresupuestoResumen>();
-            List<Presupuesto> registrados = presupuestos.ListarPorUsuario(usuarioId);
-            List<Movimiento> movimientosDelMes = new List<Movimiento>();
+            List<Presupuesto> registrados = presupuestos.ListarPorPeriodo(usuarioId, anio, mes);
+            Dictionary<string, decimal> gastosPorCategoria = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
 
             foreach (Movimiento movimiento in movimientos.ListarPorUsuario(usuarioId))
             {
                 if (movimiento.Tipo == TipoMovimiento.Gasto &&
-                    CalendarioFinanciero.EstaEnMes(movimiento.Fecha, DateTime.Today.Year, DateTime.Today.Month))
+                    CalendarioFinanciero.EstaEnMes(movimiento.Fecha, anio, mes) &&
+                    movimiento.Categoria != null)
                 {
-                    movimientosDelMes.Add(movimiento);
+                    string categoriaGasto = movimiento.Categoria.Trim();
+
+                    if (gastosPorCategoria.ContainsKey(categoriaGasto))
+                    {
+                        gastosPorCategoria[categoriaGasto] = gastosPorCategoria[categoriaGasto] + movimiento.Monto;
+                    }
+                    else
+                    {
+                        gastosPorCategoria[categoriaGasto] = movimiento.Monto;
+                    }
                 }
             }
 
@@ -45,14 +59,14 @@ namespace FinOptima.Logica.Servicios
                 resumen.Id = presupuesto.Id;
                 resumen.Categoria = presupuesto.Categoria;
                 resumen.Limite = presupuesto.Limite;
+                resumen.Anio = presupuesto.Anio;
+                resumen.Mes = presupuesto.Mes;
 
-                foreach (Movimiento movimiento in movimientosDelMes)
+                string categoriaPresupuesto = presupuesto.Categoria.Trim();
+
+                if (gastosPorCategoria.ContainsKey(categoriaPresupuesto))
                 {
-                    if (movimiento.Categoria != null &&
-                        movimiento.Categoria.Equals(presupuesto.Categoria, StringComparison.OrdinalIgnoreCase))
-                    {
-                        resumen.Gastado = resumen.Gastado + movimiento.Monto;
-                    }
+                    resumen.Gastado = gastosPorCategoria[categoriaPresupuesto];
                 }
 
                 resumen.Disponible = resumen.Limite - resumen.Gastado;
@@ -70,6 +84,16 @@ namespace FinOptima.Logica.Servicios
 
         public Resultado Guardar(Presupuesto presupuesto)
         {
+            if (presupuesto.Anio == 0)
+            {
+                presupuesto.Anio = DateTime.Today.Year;
+            }
+
+            if (presupuesto.Mes == 0)
+            {
+                presupuesto.Mes = DateTime.Today.Month;
+            }
+
             ResultadoValidacion validacion = ValidadorPresupuesto.Validar(presupuesto);
 
             if (!validacion.EsValido)
@@ -77,7 +101,7 @@ namespace FinOptima.Logica.Servicios
                 return Resultado.Mal(validacion.Mensaje);
             }
 
-            presupuesto.UsuarioId = UsuarioId();
+            presupuesto.UsuarioId = ValidadorSesion.UsuarioId(sesion);
             int identificador = presupuestos.Guardar(presupuesto);
             presupuesto.Id = identificador;
             return Resultado.Bien("Presupuesto guardado.");
@@ -85,28 +109,14 @@ namespace FinOptima.Logica.Servicios
 
         public Resultado Eliminar(int identificador)
         {
-            int usuarioId = UsuarioId();
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
 
-            foreach (Presupuesto presupuesto in presupuestos.ListarPorUsuario(usuarioId))
+            if (presupuestos.Eliminar(identificador, usuarioId))
             {
-                if (presupuesto.Id == identificador)
-                {
-                    presupuestos.Eliminar(identificador, usuarioId);
-                    return Resultado.Bien("Presupuesto eliminado.");
-                }
+                return Resultado.Bien("Presupuesto eliminado.");
             }
 
             return Resultado.Mal("El presupuesto ya no existe.");
-        }
-
-        private int UsuarioId()
-        {
-            if (!sesion.HaySesion)
-            {
-                throw new ErrorAplicacion("No hay una sesion activa.");
-            }
-
-            return sesion.UsuarioId;
         }
     }
 }

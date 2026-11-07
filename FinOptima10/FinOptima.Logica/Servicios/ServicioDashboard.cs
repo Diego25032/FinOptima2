@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using FinOptima.Datos.Contratos;
 using FinOptima.Entidades.Entidades;
 using FinOptima.Entidades.Enums;
-using FinOptima.Logica.Errores;
 using FinOptima.Logica.Modelos;
+using FinOptima.Logica.Validaciones;
 using FinOptima.Logica.Utilidades;
 
 namespace FinOptima.Logica.Servicios
@@ -30,7 +30,7 @@ namespace FinOptima.Logica.Servicios
 
         public ResumenDashboard Obtener()
         {
-            int usuarioId = UsuarioId();
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
             DateTime hoy = DateTime.Today;
             ResumenDashboard resumen = new ResumenDashboard();
             resumen.Anio = hoy.Year;
@@ -103,16 +103,6 @@ namespace FinOptima.Logica.Servicios
 
             resumen.Alertas = alertas.Listar();
             return resumen;
-        }
-
-        private int UsuarioId()
-        {
-            if (!sesion.HaySesion)
-            {
-                throw new ErrorAplicacion("No hay una sesion activa.");
-            }
-
-            return sesion.UsuarioId;
         }
     }
 }

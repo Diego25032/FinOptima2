@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using FinOptima.Logica.Composicion;
 using FinOptima.Logica.Modelos;
+using FinOptima.Vista.Temas;
 using FinOptima.Vista.Utilidades;
 
 namespace FinOptima.Vista
@@ -31,27 +32,21 @@ namespace FinOptima.Vista
         private void ConstruirInterfaz()
         {
             Text = "FinOptima - Crear cuenta";
-            StartPosition = FormStartPosition.CenterParent;
-            ClientSize = new Size(480, 430);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
-            BackColor = Color.White;
-            Font = new Font("Segoe UI", 10);
+            ClientSize = new Size(480, 440);
 
             Label titulo = new Label();
             titulo.Text = "Crear una cuenta";
             titulo.Font = new Font("Segoe UI", 16, FontStyle.Bold);
             titulo.Location = new Point(30, 20);
             titulo.AutoSize = true;
+            titulo.ForeColor = TemaActual.Actual.Texto;
+            titulo.BackColor = Color.Transparent;
             Controls.Add(titulo);
 
-            Label nota = new Label();
-            nota.Text = "La primera cuenta del sistema sera administradora.";
-            nota.ForeColor = Color.FromArgb(90, 100, 115);
-            nota.Location = new Point(32, 58);
-            nota.AutoSize = true;
-            Controls.Add(nota);
+            Controls.Add(UtilidadesVista.CrearNota("La primera cuenta del sistema sera administradora.", 32, 58, 400));
 
             Controls.Add(UtilidadesVista.CrearEtiqueta("Nombre completo", 32, 90));
             campoNombre = UtilidadesVista.CrearCampo(32, 112, 400);
@@ -71,16 +66,19 @@ namespace FinOptima.Vista
             campoConfirmacion.UseSystemPasswordChar = true;
             Controls.Add(campoConfirmacion);
 
-            Button crear = UtilidadesVista.CrearBoton("Crear cuenta", 32, 345, 190, 38, Color.FromArgb(47, 111, 237));
+            Button crear = UtilidadesVista.CrearBoton("Crear cuenta", 32, 350, 190, 38, TemaActual.Acento);
             crear.Click += AlRegistrar;
             Controls.Add(crear);
 
-            Button cancelar = UtilidadesVista.CrearBoton("Cancelar", 242, 345, 190, 38, Color.FromArgb(90, 100, 115));
+            Button cancelar = UtilidadesVista.CrearBotonSecundario("Cancelar", 242, 350, 190, 38);
             cancelar.Click += AlCancelar;
             Controls.Add(cancelar);
 
             AcceptButton = crear;
             CancelButton = cancelar;
+
+            UtilidadesVista.PrepararFormulario(this);
+            UtilidadesVista.EstilizarCampos(this);
         }
 
         private void AlRegistrar(object remitente, EventArgs argumentos)

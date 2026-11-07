@@ -1,0 +1,135 @@
+```mermaid
+%% FinOptima - servicios de finanzas personales (capa Logica)
+classDiagram
+    direction LR
+
+    class ServicioSobres {
+        +Listar() List~Sobre~
+        +Guardar(sobre) Resultado
+        +Eliminar(id) Resultado
+        +TotalSaldo() decimal
+        +CalcularMonto(ingreso, porcentaje) decimal$
+    }
+
+    class ServicioMovimientos {
+        +Listar() List~Movimiento~
+        +Listar(filtro) List~Movimiento~
+        +Guardar(movimiento) Resultado
+        +Eliminar(id) Resultado
+    }
+
+    class ServicioMetas {
+        +Listar() List~MetaResumen~
+        +Guardar(meta) Resultado
+        +Aportar(metaId, monto) Resultado
+        +Eliminar(id) Resultado
+        +TotalAhorrado() decimal
+    }
+
+    class ServicioDeudas {
+        +Listar() List~DeudaResumen~
+        +Guardar(deuda) Resultado
+        +Abonar(deudaId, monto) Resultado
+        +Eliminar(id) Resultado
+        +TotalSaldo() decimal
+    }
+
+    class ServicioPresupuestos {
+        +Listar() List~PresupuestoResumen~
+        +Listar(anio, mes) List~PresupuestoResumen~
+        +Guardar(presupuesto) Resultado
+        +Eliminar(id) Resultado
+    }
+
+    class ServicioAlertas {
+        +Listar() List~Alerta~
+    }
+
+    class ServicioDashboard {
+        +Obtener() ResumenDashboard
+    }
+
+    class ServicioAnalisis {
+        +ObtenerResumen(anio, mes) ResumenMensual
+        +ListarUltimosMeses(cantidad) List~ResumenMensual~
+    }
+
+    class SesionActual {
+        +bool HaySesion
+        +int UsuarioId
+        +RolUsuario Rol
+    }
+
+    class Resultado {
+        +bool Exito
+        +string Mensaje
+    }
+
+    class IRepositorioSobres {
+        <<interface>>
+    }
+    class IRepositorioMovimientos {
+        <<interface>>
+    }
+    class IRepositorioMetas {
+        <<interface>>
+    }
+    class IRepositorioDeudas {
+        <<interface>>
+    }
+    class IRepositorioPresupuestos {
+        <<interface>>
+    }
+
+    class ValidadorSobre {
+        <<static>>
+    }
+    class ValidadorMovimiento {
+        <<static>>
+    }
+    class ValidadorMeta {
+        <<static>>
+    }
+    class ValidadorDeuda {
+        <<static>>
+    }
+    class ValidadorPresupuesto {
+        <<static>>
+    }
+
+    ServicioSobres ..> IRepositorioSobres : usa
+    ServicioSobres ..> ValidadorSobre : valida
+    ServicioMovimientos ..> IRepositorioMovimientos : usa
+    ServicioMovimientos ..> IRepositorioSobres : consulta
+    ServicioMovimientos ..> ValidadorMovimiento : valida
+    ServicioMetas ..> IRepositorioMetas : usa
+    ServicioMetas ..> ValidadorMeta : valida
+    ServicioDeudas ..> IRepositorioDeudas : usa
+    ServicioDeudas ..> ValidadorDeuda : valida
+    ServicioPresupuestos ..> IRepositorioPresupuestos : usa
+    ServicioPresupuestos ..> IRepositorioMovimientos : consulta
+    ServicioPresupuestos ..> ValidadorPresupuesto : valida
+    ServicioAlertas ..> IRepositorioMetas : consulta
+    ServicioAlertas ..> IRepositorioDeudas : consulta
+    ServicioAlertas ..> IRepositorioMovimientos : consulta
+    ServicioAlertas ..> IRepositorioSobres : consulta
+    ServicioAlertas ..> ServicioPresupuestos : usa
+    ServicioDashboard ..> IRepositorioMovimientos : consulta
+    ServicioDashboard ..> IRepositorioSobres : consulta
+    ServicioDashboard ..> IRepositorioMetas : consulta
+    ServicioDashboard ..> IRepositorioDeudas : consulta
+    ServicioDashboard ..> ServicioAlertas : usa
+    ServicioAnalisis ..> IRepositorioMovimientos : consulta
+
+    ServicioSobres ..> SesionActual : sesion
+    ServicioMovimientos ..> SesionActual : sesion
+    ServicioMetas ..> SesionActual : sesion
+    ServicioDeudas ..> SesionActual : sesion
+    ServicioPresupuestos ..> SesionActual : sesion
+    ServicioAlertas ..> SesionActual : sesion
+    ServicioDashboard ..> SesionActual : sesion
+    ServicioAnalisis ..> SesionActual : sesion
+
+    note for ServicioDashboard "Orquesta alertas y resumenes. No habla con PostgreSQL: todo pasa por los repositorios."
+    note for ServicioSobres "Valida antes de guardar y fuerza el UsuarioId de la sesion para que nadie escriba datos de otro usuario."
+```

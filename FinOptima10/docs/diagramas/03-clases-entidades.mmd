@@ -1,0 +1,155 @@
+```mermaid
+%% FinOptima - clases de la capa Entidades
+classDiagram
+    direction LR
+
+    class Usuario {
+        +int Id
+        +string NombreCompleto
+        +string Correo
+        +string ContrasenaHash
+        +string ContrasenaSal
+        +RolUsuario Rol
+        +bool Activo
+        +int IntentosFallidos
+        +DateTime BloqueadoHasta
+        +DateTime CreadoEn
+        +string ColorAcento
+        +int TamanoFuente
+        +TemaVisual Tema
+        +bool AlertasDeudas
+        +bool AlertasMetas
+        +bool AlertasPresupuesto
+        +bool AlertasSobres
+        +byte[] Foto
+    }
+
+    class Sobre {
+        +int Id
+        +int UsuarioId
+        +string Nombre
+        +TipoSobre Tipo
+        +decimal PorcentajeObjetivo
+        +decimal PorcentajeMinimo
+        +decimal PorcentajeMaximo
+        +decimal Saldo
+        +string Descripcion
+        +bool Activo
+    }
+
+    class Movimiento {
+        +int Id
+        +int UsuarioId
+        +int SobreId
+        +TipoMovimiento Tipo
+        +string Categoria
+        +string Descripcion
+        +decimal Monto
+        +DateTime Fecha
+    }
+
+    class Meta {
+        +int Id
+        +int UsuarioId
+        +string Nombre
+        +decimal MontoObjetivo
+        +decimal MontoActual
+        +DateTime FechaLimite
+        +PrioridadMeta Prioridad
+    }
+
+    class Deuda {
+        +int Id
+        +int UsuarioId
+        +string Acreedor
+        +decimal Capital
+        +decimal Saldo
+        +decimal TasaInteres
+        +decimal PagoMinimo
+        +DateTime FechaVencimiento
+    }
+
+    class Presupuesto {
+        +int Id
+        +int UsuarioId
+        +string Categoria
+        +decimal Limite
+        +int Anio
+        +int Mes
+    }
+
+    class RegistroActividad {
+        +int Id
+        +int UsuarioId
+        +DateTime Fecha
+        +string Accion
+    }
+
+    class RegistroAuditoria {
+        +int Id
+        +int AdministradorId
+        +string AdministradorCorreo
+        +DateTime Fecha
+        +string Accion
+        +string Detalle
+    }
+
+    class RolUsuario {
+        <<enumeration>>
+        +Usuario
+        +Administrador
+    }
+
+    class TipoSobre {
+        <<enumeration>>
+        +Necesidades
+        +Ahorro
+        +Inversion
+        +Educacion
+        +Ocio
+        +Generosidad
+        +Metas
+    }
+
+    class TipoMovimiento {
+        <<enumeration>>
+        +Ingreso
+        +Gasto
+    }
+
+    class PrioridadMeta {
+        <<enumeration>>
+        +Baja
+        +Media
+        +Alta
+    }
+
+    class TemaVisual {
+        <<enumeration>>
+        +Claro
+        +Oscuro
+        +Contraste
+    }
+
+    Usuario "1" --> "0..*" Sobre : UsuarioId
+    Usuario "1" --> "0..*" Movimiento : UsuarioId
+    Usuario "1" --> "0..*" Meta : UsuarioId
+    Usuario "1" --> "0..*" Deuda : UsuarioId
+    Usuario "1" --> "0..*" Presupuesto : UsuarioId
+    Usuario "1" --> "0..*" RegistroActividad : UsuarioId
+    Sobre "1" --> "0..*" Movimiento : SobreId
+    RegistroAuditoria ..> Usuario : AdministradorId
+
+    Usuario --> RolUsuario : rol
+    Sobre --> TipoSobre : tipo
+    Movimiento --> TipoMovimiento : tipo
+    Meta --> PrioridadMeta : prioridad
+    Usuario --> TemaVisual : tema
+
+    note for Usuario "Las entidades se enlazan por claves foraneas int (UsuarioId, SobreId). No hay referencias de objeto entre clases."
+    note for RolUsuario "Valores: 1 Usuario, 2 Administrador"
+    note for TipoSobre "Valores: 1 Necesidades, 2 Ahorro, 3 Inversion, 4 Educacion, 5 Ocio, 6 Generosidad, 7 Metas"
+    note for TipoMovimiento "Valores: 1 Ingreso, 2 Gasto"
+    note for PrioridadMeta "Valores: 1 Baja, 2 Media, 3 Alta"
+    note for TemaVisual "Valores: 1 Claro, 2 Oscuro, 3 Contraste. La columna tema guarda el nombre."
+```

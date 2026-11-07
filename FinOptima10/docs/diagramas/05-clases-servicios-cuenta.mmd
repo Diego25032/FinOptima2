@@ -1,0 +1,154 @@
+```mermaid
+%% FinOptima - servicios de cuenta, administracion y soporte (capa Logica)
+classDiagram
+    direction LR
+
+    class ServicioAutenticacion {
+        +IniciarSesion(correo, contrasena) ResultadoLogin
+        +Registrar(nombre, correo, contrasena, confirmacion) Resultado
+        +CerrarSesion()
+    }
+
+    class ServicioPerfil {
+        +ObtenerActual() Usuario
+        +GuardarPerfil(nombre, colorAcento, tamanoFuente, alertasDeudas, alertasMetas, alertasPresupuesto, alertasSobres) Resultado
+        +GuardarFoto(foto) Resultado
+        +GuardarTema(tema) Resultado
+        +CambiarContrasena(actual, nueva, confirmacion) Resultado
+    }
+
+    class ServicioAdministracion {
+        +EsAdministrador() bool
+        +ObtenerResumen() ResumenAdministracion
+        +ListarCuentas() List~Usuario~
+        +CambiarRol(objetivoId, nuevoRol) Resultado
+        +CambiarEstado(objetivoId, activo) Resultado
+        +ListarAuditoria(cantidad) List~RegistroAuditoria~
+        +ExportarCuentas(ruta) Resultado
+    }
+
+    class ServicioReportes {
+        +ExportarExcel(ruta) Resultado
+        +ExportarPdf(ruta) Resultado
+    }
+
+    class ServicioRespaldo {
+        +Exportar(ruta) ResumenRespaldo
+        +Importar(ruta) ResumenRespaldo
+    }
+
+    class ServicioActividad {
+        +Registrar(accion)
+        +ListarRecientes(cantidad) List~RegistroActividad~
+    }
+
+    class ServicioSimuladores {
+        +SimularAhorro(meta, ahorroMensual) ResultadoSimulacionAhorro
+        +SimularPagoDeuda(deuda, pagoMensual) ResultadoSimulacionDeuda
+    }
+
+    class SesionActual {
+        +bool HaySesion
+        +int UsuarioId
+        +RolUsuario Rol
+        +Iniciar(usuario)
+        +Cerrar()
+    }
+
+    class Resultado {
+        +bool Exito
+        +string Mensaje
+    }
+
+    class IRepositorioAutenticacion {
+        <<interface>>
+    }
+    class IRepositorioPerfil {
+        <<interface>>
+    }
+    class IRepositorioAdministracion {
+        <<interface>>
+    }
+    class IRepositorioAuditoria {
+        <<interface>>
+    }
+    class IRepositorioActividad {
+        <<interface>>
+    }
+    class IRepositorioSobres {
+        <<interface>>
+    }
+    class IRepositorioMovimientos {
+        <<interface>>
+    }
+    class IRepositorioMetas {
+        <<interface>>
+    }
+    class IRepositorioDeudas {
+        <<interface>>
+    }
+    class IGeneradorReportes {
+        <<interface>>
+    }
+    class IExportadorCuentas {
+        <<interface>>
+    }
+    class IServicioRespaldo {
+        <<interface>>
+    }
+
+    class ValidadorUsuario {
+        <<static>>
+    }
+    class HashContrasena {
+        <<static>>
+    }
+    class PoliticaBloqueo {
+        <<static>>
+    }
+    class PoliticaContrasena {
+        <<static>>
+    }
+
+    ServicioAutenticacion ..> IRepositorioAutenticacion : usa
+    ServicioAutenticacion ..> IRepositorioSobres : crea sobres
+    ServicioAutenticacion ..> IRepositorioActividad : registra
+    ServicioAutenticacion ..> ValidadorUsuario : valida
+    ServicioAutenticacion ..> HashContrasena : verifica
+    ServicioAutenticacion ..> PoliticaBloqueo : aplica
+    ServicioAutenticacion ..> SesionActual : abre sesion
+
+    ServicioPerfil ..> IRepositorioPerfil : usa
+    ServicioPerfil ..> ValidadorUsuario : valida
+    ServicioPerfil ..> HashContrasena : usa
+    ServicioPerfil ..> PoliticaContrasena : aplica
+
+    ServicioAdministracion ..> IRepositorioAdministracion : usa
+    ServicioAdministracion ..> IRepositorioAuditoria : registra
+    ServicioAdministracion ..> IExportadorCuentas : exporta
+
+    ServicioReportes ..> IGeneradorReportes : usa
+    ServicioReportes ..> IRepositorioSobres : consulta
+    ServicioReportes ..> IRepositorioMovimientos : consulta
+    ServicioReportes ..> IRepositorioMetas : consulta
+    ServicioReportes ..> IRepositorioDeudas : consulta
+
+    ServicioRespaldo ..> IServicioRespaldo : usa
+    ServicioRespaldo ..> IRepositorioActividad : registra
+    ServicioActividad ..> IRepositorioActividad : usa
+
+    ServicioAutenticacion ..> SesionActual : sesion
+    ServicioPerfil ..> SesionActual : sesion
+    ServicioAdministracion ..> SesionActual : sesion
+    ServicioReportes ..> SesionActual : sesion
+    ServicioRespaldo ..> SesionActual : sesion
+    ServicioActividad ..> SesionActual : sesion
+
+    ServicioSimuladores ..> ResultadoSimulacionAhorro : produce
+    ServicioSimuladores ..> ResultadoSimulacionDeuda : produce
+
+    note for ServicioAdministracion "Solo un Administrador puede cambiar roles, estados y ver la auditoria."
+    note for ServicioPerfil "GuardarTema valida la sesion, actualiza la cuenta y vuelve a iniciar la sesion con el tema nuevo."
+    note for ServicioRespaldo "Traduce ResumenRespaldoDatos de la capa Datos a ResumenRespaldo de la capa Logica."
+    note for ServicioSimuladores "No usa base de datos: calcula sobre objetos Meta y Deuda que recibe."
+```

@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using FinOptima.Logica.Composicion;
 using FinOptima.Logica.Modelos;
+using FinOptima.Vista.Temas;
 using FinOptima.Vista.Utilidades;
 
 namespace FinOptima.Vista.Modulos
@@ -18,20 +19,29 @@ namespace FinOptima.Vista.Modulos
         {
             Servicios = servicios;
             Margen = 24;
-            Acento = UtilidadesVista.ColorDesdeTexto(servicios.Sesion.Usuario.ColorAcento);
-            Letra = servicios.Sesion.Usuario.TamanoFuente;
+            Acento = TemaActual.Actual.AcentoVisible(UtilidadesVista.ColorDesdeTexto(servicios.Sesion.Usuario.ColorAcento));
+            Letra = UtilidadesVista.TamanoFuenteSeguro(servicios.Sesion.Usuario.TamanoFuente);
 
             Dock = DockStyle.Fill;
             AutoScroll = true;
-            BackColor = Color.FromArgb(244, 246, 249);
+            BackColor = TemaActual.Actual.Fondo;
             Font = new Font("Segoe UI", Letra);
+
+            // Los modulos empiezan su contenido en y=52; el titulo no crece mas para no invadirlo.
+            float tamanoTitulo = Letra + 8;
+
+            if (tamanoTitulo > 18)
+            {
+                tamanoTitulo = 18;
+            }
 
             Label rotulo = new Label();
             rotulo.Text = titulo;
-            rotulo.Location = new Point(Margen, 18);
+            rotulo.Location = new Point(Margen, 8);
             rotulo.AutoSize = true;
-            rotulo.Font = new Font("Segoe UI", Letra + 8, FontStyle.Bold);
-            rotulo.ForeColor = Color.FromArgb(18, 32, 47);
+            rotulo.Font = new Font("Segoe UI", tamanoTitulo, FontStyle.Bold);
+            rotulo.ForeColor = TemaActual.Actual.Texto;
+            rotulo.BackColor = Color.Transparent;
             Controls.Add(rotulo);
         }
 
@@ -59,12 +69,17 @@ namespace FinOptima.Vista.Modulos
 
         protected Button BotonSecundario(string texto, int x, int y, int ancho)
         {
-            return UtilidadesVista.CrearBoton(texto, x, y, ancho, 32, Color.FromArgb(90, 100, 115));
+            return UtilidadesVista.CrearBotonSecundario(texto, x, y, ancho, 32);
         }
 
         protected Button BotonPeligro(string texto, int x, int y, int ancho)
         {
-            return UtilidadesVista.CrearBoton(texto, x, y, ancho, 32, Color.FromArgb(178, 60, 60));
+            return UtilidadesVista.CrearBotonPeligro(texto, x, y, ancho, 32);
+        }
+
+        protected int FilaCampo(int yEtiqueta)
+        {
+            return yEtiqueta + TextRenderer.MeasureText("Ag", Font).Height + 4;
         }
     }
 }

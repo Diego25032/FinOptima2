@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using FinOptima.Datos.Contratos;
 using FinOptima.Entidades.Entidades;
-using FinOptima.Logica.Errores;
 using FinOptima.Logica.Modelos;
 using FinOptima.Logica.Utilidades;
 using FinOptima.Logica.Validaciones;
@@ -24,7 +23,7 @@ namespace FinOptima.Logica.Servicios
         {
             List<DeudaResumen> resumenes = new List<DeudaResumen>();
 
-            foreach (Deuda deuda in deudas.ListarPorUsuario(UsuarioId()))
+            foreach (Deuda deuda in deudas.ListarPorUsuario(ValidadorSesion.UsuarioId(sesion)))
             {
                 resumenes.Add(CalculadoraResumenes.CrearDeudaResumen(deuda, DateTime.Today));
             }
@@ -41,7 +40,7 @@ namespace FinOptima.Logica.Servicios
                 return Resultado.Mal(validacion.Mensaje);
             }
 
-            deuda.UsuarioId = UsuarioId();
+            deuda.UsuarioId = ValidadorSesion.UsuarioId(sesion);
 
             if (deuda.Id == 0)
             {
@@ -75,7 +74,7 @@ namespace FinOptima.Logica.Servicios
                 return Resultado.Mal("El abono debe ser mayor que cero.");
             }
 
-            int usuarioId = UsuarioId();
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
             Deuda deuda = deudas.BuscarPorId(deudaId, usuarioId);
 
             if (deuda == null)
@@ -106,7 +105,7 @@ namespace FinOptima.Logica.Servicios
 
         public Resultado Eliminar(int identificador)
         {
-            int usuarioId = UsuarioId();
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
             Deuda deuda = deudas.BuscarPorId(identificador, usuarioId);
 
             if (deuda == null)
@@ -122,22 +121,12 @@ namespace FinOptima.Logica.Servicios
         {
             decimal total = 0;
 
-            foreach (Deuda deuda in deudas.ListarPorUsuario(UsuarioId()))
+            foreach (Deuda deuda in deudas.ListarPorUsuario(ValidadorSesion.UsuarioId(sesion)))
             {
                 total = total + deuda.Saldo;
             }
 
             return total;
-        }
-
-        private int UsuarioId()
-        {
-            if (!sesion.HaySesion)
-            {
-                throw new ErrorAplicacion("No hay una sesion activa.");
-            }
-
-            return sesion.UsuarioId;
         }
     }
 }

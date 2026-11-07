@@ -5,6 +5,7 @@ using FinOptima.Entidades.Entidades;
 using FinOptima.Entidades.Enums;
 using FinOptima.Logica.Errores;
 using FinOptima.Logica.Modelos;
+using FinOptima.Logica.Validaciones;
 using FinOptima.Logica.Utilidades;
 
 namespace FinOptima.Logica.Servicios
@@ -32,7 +33,7 @@ namespace FinOptima.Logica.Servicios
                 throw new ErrorAplicacion("El ano debe estar entre 2000 y 2100.");
             }
 
-            List<Movimiento> lista = movimientos.ListarPorUsuario(UsuarioId());
+            List<Movimiento> lista = movimientos.ListarPorUsuario(ValidadorSesion.UsuarioId(sesion));
             return Calcular(lista, anio, mes);
         }
 
@@ -48,7 +49,7 @@ namespace FinOptima.Logica.Servicios
                 cantidad = 24;
             }
 
-            List<Movimiento> lista = movimientos.ListarPorUsuario(UsuarioId());
+            List<Movimiento> lista = movimientos.ListarPorUsuario(ValidadorSesion.UsuarioId(sesion));
             List<ResumenMensual> resumenes = new List<ResumenMensual>();
             DateTime referencia = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
 
@@ -157,16 +158,6 @@ namespace FinOptima.Logica.Servicios
                     }
                 }
             }
-        }
-
-        private int UsuarioId()
-        {
-            if (!sesion.HaySesion)
-            {
-                throw new ErrorAplicacion("No hay una sesion activa.");
-            }
-
-            return sesion.UsuarioId;
         }
     }
 }

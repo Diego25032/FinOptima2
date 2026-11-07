@@ -1,0 +1,179 @@
+```mermaid
+%% FinOptima - modelos y DTOs de la capa Logica
+classDiagram
+    direction LR
+
+    %% --- Resultados de operaciones ---
+    class Resultado {
+        +bool Exito
+        +string Mensaje
+        +Bien(mensaje) Resultado$
+        +Mal(mensaje) Resultado$
+    }
+
+    class ResultadoLogin {
+        +bool Exito
+        +string Mensaje
+        +Usuario Usuario
+    }
+
+    class SesionActual {
+        +bool HaySesion
+        +int UsuarioId
+        +RolUsuario Rol
+        +bool EsAdministrador
+        +Iniciar(usuario)
+        +Cerrar()
+    }
+
+    %% --- Resumenes de pantalla ---
+    class SobreResumen {
+        +int Id
+        +string Nombre
+        +decimal PorcentajeObjetivo
+        +decimal PorcentajeMinimo
+        +decimal PorcentajeMaximo
+        +decimal Saldo
+        +decimal MontoSugerido
+        +string Estado
+    }
+
+    class MetaResumen {
+        +int Id
+        +string Nombre
+        +decimal MontoObjetivo
+        +decimal MontoActual
+        +decimal Progreso
+        +PrioridadMeta Prioridad
+        +DateTime FechaLimite
+        +int DiasRestantes
+        +string Estado
+    }
+
+    class DeudaResumen {
+        +int Id
+        +string Acreedor
+        +decimal Capital
+        +decimal Saldo
+        +decimal TasaInteres
+        +decimal PagoMinimo
+        +DateTime FechaVencimiento
+        +int DiasRestantes
+        +string Estado
+    }
+
+    class PresupuestoResumen {
+        +int Id
+        +string Categoria
+        +decimal Limite
+        +decimal Gastado
+        +decimal Disponible
+        +decimal Porcentaje
+        +int Anio
+        +int Mes
+    }
+
+    class FiltroMovimientos {
+        +int Anio
+        +int Mes
+        +TipoMovimiento? Tipo
+        +string Categoria
+        +string Texto
+    }
+
+    class Alerta {
+        +string Tipo
+        +string Titulo
+        +string Mensaje
+        +string Nivel
+    }
+
+    class DetalleCategoria {
+        +string Categoria
+        +decimal Monto
+        +decimal Porcentaje
+    }
+
+    class ResumenMensual {
+        +int Anio
+        +int Mes
+        +string NombreMes
+        +decimal Ingresos
+        +decimal Gastos
+        +decimal Ahorro
+        +decimal PorcentajeAhorro
+        +GastosPorCategoria
+        +IngresosPorCategoria
+    }
+
+    class ResumenDashboard {
+        +int Anio
+        +int Mes
+        +string NombreMes
+        +decimal IngresosMes
+        +decimal GastosMes
+        +decimal DisponibleMes
+        +decimal SaldoSobres
+        +decimal AhorroMetas
+        +decimal SaldoDeudas
+        +Sobres
+        +Alertas
+    }
+
+    class ResumenRespaldo {
+        +int Sobres
+        +int Movimientos
+        +int Metas
+        +int Deudas
+        +int Total
+    }
+
+    class ResumenAdministracion {
+        +int TotalCuentas
+        +int Administradores
+        +int Usuarios
+        +int Activas
+        +int Inactivas
+    }
+
+    %% --- Simulaciones ---
+    class ResultadoSimulacionAhorro {
+        +bool Posible
+        +string Mensaje
+        +int Meses
+        +DateTime FechaEstimada
+        +decimal AhorroMensual
+        +decimal Faltante
+    }
+
+    class ResultadoSimulacionDeuda {
+        +bool Posible
+        +string Mensaje
+        +int Meses
+        +decimal TotalIntereses
+        +decimal TotalPagado
+        +DateTime FechaEstimada
+    }
+
+    class Usuario {
+        <<entidad>>
+    }
+    class PrioridadMeta {
+        <<enum>>
+    }
+    class TipoMovimiento {
+        <<enum>>
+    }
+
+    ResumenMensual *-- DetalleCategoria : gastos e ingresos
+    ResumenDashboard *-- SobreResumen : sobres
+    ResumenDashboard *-- Alerta : alertas
+    ResultadoLogin --> Usuario : usuario
+    SesionActual --> Usuario : usuario
+    MetaResumen --> PrioridadMeta : prioridad
+    FiltroMovimientos --> TipoMovimiento : tipo opcional
+
+    note for Resultado "Los servicios devuelven Resultado para no lanzar excepciones por errores de validacion."
+    note for SesionActual "Guarda el usuario autenticado. La fabrica crea una sola instancia y la comparte con todos los servicios."
+    note for FiltroMovimientos "Anio y Mes en 0 significan sin filtro. Tipo null significa ingresos y gastos."
+```

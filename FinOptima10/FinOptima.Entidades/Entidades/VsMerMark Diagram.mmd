@@ -1,0 +1,1476 @@
+```mermaid
+%%{init: {'class': {'padding': 20}, 'flowchart': {'nodeSpacing': 80, 'rankSpacing': 100}}}%%
+classDiagram
+direction LR %% Change to TB for top-to-bottom layout
+
+%% Relaciones que VsMerMark no infiere
+Usuario "1" --> "1" RolUsuario : rol
+Sobre "1" --> "1" TipoSobre : tipo
+Movimiento "1" --> "1" TipoMovimiento : tipo
+Meta "1" --> "1" PrioridadMeta : prioridad
+Usuario "1" --> "1" TemaVisual : tema
+
+Usuario "1" --> "0..*" Sobre : posee por UsuarioId
+Usuario "1" --> "0..*" Movimiento : registra por UsuarioId
+Usuario "1" --> "0..*" Meta : define por UsuarioId
+Usuario "1" --> "0..*" Deuda : debe por UsuarioId
+Usuario "1" --> "0..*" Presupuesto : define por UsuarioId
+Usuario "1" --> "0..*" RegistroActividad : genera por UsuarioId
+Sobre "1" --> "0..*" Movimiento : agrupa por SobreId
+
+note for Usuario "Las asociaciones usan claves foráneas (UsuarioId/SobreId); no hay referencias de objeto entre entidades."
+
+%% Lógica depende de los contratos de Datos
+ServicioAutenticacion ..> IRepositorioAutenticacion : usa
+ServicioAutenticacion ..> IRepositorioSobres : usa
+ServicioAutenticacion ..> IRepositorioActividad : usa
+ServicioSobres ..> IRepositorioSobres : usa
+ServicioMovimientos ..> IRepositorioMovimientos : usa
+ServicioMovimientos ..> IRepositorioSobres : usa
+ServicioMetas ..> IRepositorioMetas : usa
+ServicioDeudas ..> IRepositorioDeudas : usa
+ServicioPresupuestos ..> IRepositorioPresupuestos : usa
+ServicioPresupuestos ..> IRepositorioMovimientos : usa
+ServicioAlertas ..> IRepositorioMetas : usa
+ServicioAlertas ..> IRepositorioDeudas : usa
+ServicioAlertas ..> IRepositorioMovimientos : usa
+ServicioAlertas ..> IRepositorioSobres : usa
+ServicioAlertas ..> ServicioPresupuestos : usa
+ServicioDashboard ..> IRepositorioMovimientos : usa
+ServicioDashboard ..> IRepositorioSobres : usa
+ServicioDashboard ..> IRepositorioMetas : usa
+ServicioDashboard ..> IRepositorioDeudas : usa
+ServicioDashboard ..> ServicioAlertas : usa
+ServicioAnalisis ..> IRepositorioMovimientos : usa
+ServicioPerfil ..> IRepositorioPerfil : usa
+ServicioAdministracion ..> IRepositorioAdministracion : usa
+ServicioAdministracion ..> IRepositorioAuditoria : usa
+ServicioAdministracion ..> IExportadorCuentas : usa
+ServicioReportes ..> IGeneradorReportes : usa
+ServicioReportes ..> IRepositorioSobres : usa
+ServicioReportes ..> IRepositorioMovimientos : usa
+ServicioReportes ..> IRepositorioMetas : usa
+ServicioReportes ..> IRepositorioDeudas : usa
+ServicioRespaldo ..> IServicioRespaldo : usa
+ServicioRespaldo ..> IRepositorioActividad : usa
+ServicioActividad ..> IRepositorioActividad : usa
+
+%% Datos implementa los contratos
+RepositorioUsuariosPostgres ..|> IRepositorioAutenticacion
+RepositorioUsuariosPostgres ..|> IRepositorioPerfil
+RepositorioUsuariosPostgres ..|> IRepositorioAdministracion
+RepositorioSobresPostgres ..|> IRepositorioSobres
+RepositorioMovimientosPostgres ..|> IRepositorioMovimientos
+RepositorioMetasPostgres ..|> IRepositorioMetas
+RepositorioDeudasPostgres ..|> IRepositorioDeudas
+RepositorioPresupuestosPostgres ..|> IRepositorioPresupuestos
+RepositorioActividadPostgres ..|> IRepositorioActividad
+RepositorioAuditoriaPostgres ..|> IRepositorioAuditoria
+GeneradorReportes ..|> IGeneradorReportes
+ExportadorCuentasCsv ..|> IExportadorCuentas
+ServicioRespaldoJson ..|> IServicioRespaldo
+
+%% Datos mapea Entidades
+RepositorioUsuariosPostgres ..> Usuario : mapea
+RepositorioSobresPostgres ..> Sobre : mapea
+RepositorioMovimientosPostgres ..> Movimiento : mapea
+RepositorioMetasPostgres ..> Meta : mapea
+RepositorioDeudasPostgres ..> Deuda : mapea
+RepositorioPresupuestosPostgres ..> Presupuesto : mapea
+RepositorioActividadPostgres ..> RegistroActividad : mapea
+RepositorioAuditoriaPostgres ..> RegistroAuditoria : mapea
+
+note for SesionActual "Los servicios obtienen el usuario conectado desde aquí."
+note for FabricaServicios "Raíz de composición: crea repositorios y servicios."
+
+
+class RegistroActividad {
+    +Id: int
+    +UsuarioId: int
+    +Fecha: DateTime
+    +Accion: string
+}
+
+class Meta {
+    +Id: int
+    +UsuarioId: int
+    +Nombre: string
+    +MontoObjetivo: decimal
+    +MontoActual: decimal
+    +FechaLimite: DateTime
+    +Prioridad: PrioridadMeta
+}
+
+class Movimiento {
+    +Id: int
+    +UsuarioId: int
+    +SobreId: int
+    +Tipo: TipoMovimiento
+    +Categoria: string
+    +Descripcion: string
+    +Monto: decimal
+    +Fecha: DateTime
+}
+
+class Usuario {
+    +Id: int
+    +NombreCompleto: string
+    +Correo: string
+    +ContrasenaHash: string
+    +ContrasenaSal: string
+    +Rol: RolUsuario
+    +Activo: bool
+    +IntentosFallidos: int
+    +BloqueadoHasta: DateTime
+    +CreadoEn: DateTime
+    +ColorAcento: string
+    +TamanoFuente: int
+    +Tema: TemaVisual
+    +AlertasDeudas: bool
+    +AlertasMetas: bool
+    +AlertasPresupuesto: bool
+    +AlertasSobres: bool
+    +Foto: byte[]
+}
+
+class RegistroAuditoria {
+    +Id: int
+    +AdministradorId: int
+    +AdministradorCorreo: string
+    +Fecha: DateTime
+    +Accion: string
+    +Detalle: string
+}
+
+class Deuda {
+    +Id: int
+    +UsuarioId: int
+    +Acreedor: string
+    +Capital: decimal
+    +Saldo: decimal
+    +TasaInteres: decimal
+    +PagoMinimo: decimal
+    +FechaVencimiento: DateTime
+}
+
+class Sobre {
+    +Id: int
+    +UsuarioId: int
+    +Nombre: string
+    +Tipo: TipoSobre
+    +PorcentajeObjetivo: decimal
+    +PorcentajeMinimo: decimal
+    +PorcentajeMaximo: decimal
+    +Saldo: decimal
+    +Descripcion: string
+    +Activo: bool
+}
+
+class Presupuesto {
+    +Id: int
+    +UsuarioId: int
+    +Categoria: string
+    +Limite: decimal
+    +Anio: int
+    +Mes: int
+}
+
+class PrioridadMeta {
+    <<enumeration>>
+    Baja
+    Media
+    Alta
+}
+
+class TemaVisual {
+    <<enumeration>>
+    Claro
+    Oscuro
+    Contraste
+}
+
+class TipoSobre {
+    <<enumeration>>
+    Necesidades
+    Ahorro
+    Inversion
+    Educacion
+    Ocio
+    Generosidad
+    Metas
+}
+
+class TipoMovimiento {
+    <<enumeration>>
+    Ingreso
+    Gasto
+}
+
+class RolUsuario {
+    <<enumeration>>
+    Usuario
+    Administrador
+}
+
+class CatalogoSobresPredeterminados {
+    <<static>>
+    +Crear(usuarioId: int) List~Sobre~$
+    -CrearSobre(usuarioId: int, nombre: string, tipo: TipoSobre, objetivo: decimal, minimo: decimal, maximo: decimal, descripcion: string) Sobre$
+}
+
+class FabricaServicios {
+    -conexion: ConexionBD
+    +Sesion: SesionActual
+    +Autenticacion: ServicioAutenticacion
+    +Sobres: ServicioSobres
+    +Movimientos: ServicioMovimientos
+    +Metas: ServicioMetas
+    +Deudas: ServicioDeudas
+    +Presupuestos: ServicioPresupuestos
+    +Alertas: ServicioAlertas
+    +Dashboard: ServicioDashboard
+    +Analisis: ServicioAnalisis
+    +Simuladores: ServicioSimuladores
+    +Perfil: ServicioPerfil
+    +Administracion: ServicioAdministracion
+    +Respaldo: ServicioRespaldo
+    +Reportes: ServicioReportes
+    +Actividad: ServicioActividad
+    +ProbarConexion()
+    -Configurar(conexionBaseDatos: ConexionBD)
+}
+
+class ErrorAplicacion {
+}
+
+class Exception
+
+class ResultadoSimulacionAhorro {
+    +Posible: bool
+    +Mensaje: string
+    +Meses: int
+    +FechaEstimada: DateTime
+    +AhorroMensual: decimal
+    +Faltante: decimal
+}
+
+class ResultadoSimulacionDeuda {
+    +Posible: bool
+    +Mensaje: string
+    +Meses: int
+    +TotalIntereses: decimal
+    +TotalPagado: decimal
+    +FechaEstimada: DateTime
+}
+
+class SesionActual {
+    -usuario: Usuario
+    +HaySesion: bool
+    +Usuario: Usuario
+    +UsuarioId: int
+    +Rol: RolUsuario
+    +EsAdministrador: bool
+    +Iniciar(usuarioNuevo: Usuario)
+    +Cerrar()
+}
+
+class SobreResumen {
+    +Id: int
+    +Nombre: string
+    +PorcentajeObjetivo: decimal
+    +PorcentajeMinimo: decimal
+    +PorcentajeMaximo: decimal
+    +Saldo: decimal
+    +MontoSugerido: decimal
+    +Estado: string
+}
+
+class MetaResumen {
+    +Id: int
+    +Nombre: string
+    +MontoObjetivo: decimal
+    +MontoActual: decimal
+    +Progreso: decimal
+    +Prioridad: PrioridadMeta
+    +FechaLimite: DateTime
+    +DiasRestantes: int
+    +Estado: string
+}
+
+class DeudaResumen {
+    +Id: int
+    +Acreedor: string
+    +Capital: decimal
+    +Saldo: decimal
+    +TasaInteres: decimal
+    +PagoMinimo: decimal
+    +FechaVencimiento: DateTime
+    +DiasRestantes: int
+    +Estado: string
+}
+
+class PresupuestoResumen {
+    +Id: int
+    +Categoria: string
+    +Limite: decimal
+    +Gastado: decimal
+    +Disponible: decimal
+    +Porcentaje: decimal
+    +Anio: int
+    +Mes: int
+}
+
+class FiltroMovimientos {
+    +Anio: int
+    +Mes: int
+    +Tipo: TipoMovimiento?
+    +Categoria: string
+    +Texto: string
+}
+
+class Alerta {
+    +Tipo: string
+    +Titulo: string
+    +Mensaje: string
+    +Nivel: string
+}
+
+class DetalleCategoria {
+    +Categoria: string
+    +Monto: decimal
+    +Porcentaje: decimal
+}
+
+class ResumenMensual {
+    +Anio: int
+    +Mes: int
+    +NombreMes: string
+    +Ingresos: decimal
+    +Gastos: decimal
+    +Ahorro: decimal
+    +PorcentajeAhorro: decimal
+    +GastosPorCategoria: List~DetalleCategoria~
+    +IngresosPorCategoria: List~DetalleCategoria~
+}
+
+class ResumenDashboard {
+    +Anio: int
+    +Mes: int
+    +NombreMes: string
+    +IngresosMes: decimal
+    +GastosMes: decimal
+    +DisponibleMes: decimal
+    +SaldoSobres: decimal
+    +AhorroMetas: decimal
+    +SaldoDeudas: decimal
+    +Sobres: List~SobreResumen~
+    +Alertas: List~Alerta~
+}
+
+class ResumenRespaldo {
+    +Sobres: int
+    +Movimientos: int
+    +Metas: int
+    +Deudas: int
+    +Total: int
+}
+
+class ResumenAdministracion {
+    +TotalCuentas: int
+    +Administradores: int
+    +Usuarios: int
+    +Activas: int
+    +Inactivas: int
+}
+
+class Resultado {
+    +Exito: bool
+    +Mensaje: string
+    +Bien(mensaje: string) Resultado$
+    +Mal(mensaje: string) Resultado$
+}
+
+class ResultadoLogin {
+    +Exito: bool
+    +Mensaje: string
+    +Usuario: Usuario
+}
+
+class HashContrasena {
+    <<static>>
+    -TamanoSal: int
+    -TamanoHash: int
+    -Iteraciones: int
+    +CrearSal() string$
+    +Calcular(contrasena: string, sal: string) string$
+    +Verificar(contrasena: string, sal: string, hashGuardado: string) bool$
+}
+
+class PoliticaBloqueo {
+    <<static>>
+    +MaximoIntentos: int
+    +MinutosBloqueo: int
+    +EstaBloqueada(bloqueadoHasta: DateTime, ahora: DateTime) bool$
+    +CalcularBloqueo(intentos: int, ahora: DateTime) DateTime$
+    +MinutosRestantes(bloqueadoHasta: DateTime, ahora: DateTime) int$
+}
+
+class PoliticaContrasena {
+    <<static>>
+    +LongitudMinima: int
+    +Validar(contrasena: string) ResultadoValidacion$
+}
+
+class ServicioMovimientos {
+    -movimientos: IRepositorioMovimientos
+    -sobres: IRepositorioSobres
+    -sesion: SesionActual
+    +Listar() List~Movimiento~
+    +Listar(filtro: FiltroMovimientos) List~Movimiento~
+    +Guardar(movimiento: Movimiento) Resultado
+    +Eliminar(identificador: int) Resultado
+    -AplicarEfecto(movimiento: Movimiento, usuarioId: int)
+    -RevertirEfecto(movimiento: Movimiento, usuarioId: int)
+}
+
+class ServicioAnalisis {
+    -movimientos: IRepositorioMovimientos
+    -sesion: SesionActual
+    +ObtenerResumen(anio: int, mes: int) ResumenMensual
+    +ListarUltimosMeses(cantidad: int) List~ResumenMensual~
+    -Calcular(lista: List~Movimiento~, anio: int, mes: int) ResumenMensual$
+    -Acumular(valores: Dictionary~string, decimal~, categoria: string, monto: decimal)$
+    -ConvertirDetalle(valores: Dictionary~string, decimal~, total: decimal) List~DetalleCategoria~$
+    -OrdenarPorMonto(lista: List~DetalleCategoria~)$
+}
+
+class ServicioDashboard {
+    -movimientos: IRepositorioMovimientos
+    -sobres: IRepositorioSobres
+    -metas: IRepositorioMetas
+    -deudas: IRepositorioDeudas
+    -alertas: ServicioAlertas
+    -sesion: SesionActual
+    +Obtener() ResumenDashboard
+}
+
+class ServicioAutenticacion {
+    -usuarios: IRepositorioAutenticacion
+    -sobres: IRepositorioSobres
+    -actividad: IRepositorioActividad
+    -sesion: SesionActual
+    +IniciarSesion(correo: string, contrasena: string) ResultadoLogin
+    +Registrar(nombre: string, correo: string, contrasena: string, confirmacion: string) Resultado
+    +CerrarSesion()
+    -RegistrarIntentoFallido(usuario: Usuario, ahora: DateTime)
+    -LimpiarCorreo(correo: string) string$
+}
+
+class ServicioAdministracion {
+    -usuarios: IRepositorioAdministracion
+    -auditoria: IRepositorioAuditoria
+    -exportador: IExportadorCuentas
+    -sesion: SesionActual
+    +EsAdministrador() bool
+    +ObtenerResumen() ResumenAdministracion
+    +ListarCuentas() List~Usuario~
+    +CambiarRol(objetivoId: int, nuevoRol: RolUsuario) Resultado
+    +CambiarEstado(objetivoId: int, activo: bool) Resultado
+    +ListarAuditoria(cantidad: int) List~RegistroAuditoria~
+    +ExportarCuentas(ruta: string) Resultado
+    -VerificarAdministrador()
+}
+
+class ServicioRespaldo {
+    -respaldo: IServicioRespaldo
+    -actividad: IRepositorioActividad
+    -sesion: SesionActual
+    +Exportar(ruta: string) ResumenRespaldo
+    +Importar(ruta: string) ResumenRespaldo
+    -Convertir(datos: ResumenRespaldoDatos) ResumenRespaldo$
+}
+
+class ServicioReportes {
+    -generador: IGeneradorReportes
+    -sobres: IRepositorioSobres
+    -movimientos: IRepositorioMovimientos
+    -metas: IRepositorioMetas
+    -deudas: IRepositorioDeudas
+    -sesion: SesionActual
+    +ExportarExcel(ruta: string) Resultado
+    +ExportarPdf(ruta: string) Resultado
+}
+
+class ServicioMetas {
+    -metas: IRepositorioMetas
+    -sesion: SesionActual
+    +Listar() List~MetaResumen~
+    +Guardar(meta: Meta) Resultado
+    +Aportar(metaId: int, monto: decimal) Resultado
+    +Eliminar(identificador: int) Resultado
+    +TotalAhorrado() decimal
+}
+
+class ServicioAlertas {
+    -metas: IRepositorioMetas
+    -deudas: IRepositorioDeudas
+    -movimientos: IRepositorioMovimientos
+    -sobres: IRepositorioSobres
+    -presupuestos: ServicioPresupuestos
+    -sesion: SesionActual
+    +Listar() List~Alerta~
+    -AgregarAlertasDeMetas(usuarioId: int, hoy: DateTime, alertas: List~Alerta~)
+    -AgregarAlertasDeDeudas(usuarioId: int, hoy: DateTime, alertas: List~Alerta~)
+    -AgregarAlertasDePresupuestos(alertas: List~Alerta~)
+    -AgregarAlertasDeSobres(usuarioId: int, alertas: List~Alerta~)
+}
+
+class ServicioSimuladores {
+    +SimularAhorro(meta: Meta, ahorroMensual: decimal) ResultadoSimulacionAhorro
+    +SimularPagoDeuda(deuda: Deuda, pagoMensual: decimal) ResultadoSimulacionDeuda
+}
+
+class ServicioActividad {
+    -actividad: IRepositorioActividad
+    -sesion: SesionActual
+    +Registrar(accion: string)
+    +ListarRecientes(cantidad: int) List~RegistroActividad~
+}
+
+class ServicioPerfil {
+    -usuarios: IRepositorioPerfil
+    -sesion: SesionActual
+    +ObtenerActual() Usuario
+    +GuardarPerfil(nombre: string, colorAcento: string, tamanoFuente: int, alertasDeudas: bool, alertasMetas: bool, alertasPresupuesto: bool, alertasSobres: bool) Resultado
+    +GuardarFoto(foto: byte[]) Resultado
+    +GuardarTema(tema: TemaVisual) Resultado
+    +CambiarContrasena(actual: string, nueva: string, confirmacion: string) Resultado
+    -ColorValido(color: string) bool$
+}
+
+class ServicioPresupuestos {
+    -presupuestos: IRepositorioPresupuestos
+    -movimientos: IRepositorioMovimientos
+    -sesion: SesionActual
+    +Listar() List~PresupuestoResumen~
+    +Listar(anio: int, mes: int) List~PresupuestoResumen~
+    +Guardar(presupuesto: Presupuesto) Resultado
+    +Eliminar(identificador: int) Resultado
+}
+
+class ServicioDeudas {
+    -deudas: IRepositorioDeudas
+    -sesion: SesionActual
+    +Listar() List~DeudaResumen~
+    +Guardar(deuda: Deuda) Resultado
+    +Abonar(deudaId: int, monto: decimal) Resultado
+    +Eliminar(identificador: int) Resultado
+    +TotalSaldo() decimal
+}
+
+class ServicioSobres {
+    -sobres: IRepositorioSobres
+    -sesion: SesionActual
+    +Listar() List~Sobre~
+    +Guardar(sobre: Sobre) Resultado
+    +Eliminar(identificador: int) Resultado
+    +TotalSaldo() decimal
+    +CalcularMonto(ingreso: decimal, porcentaje: decimal) decimal$
+}
+
+class CalendarioFinanciero {
+    <<static>>
+    +NombreMes(mes: int) string$
+    +EstaEnMes(fecha: DateTime, anio: int, mes: int) bool$
+    +DiasHasta(fecha: DateTime, referencia: DateTime) int$
+}
+
+class CalculadoraResumenes {
+    <<static>>
+    +ProgresoMeta(meta: Meta) decimal$
+    +CrearMetaResumen(meta: Meta, hoy: DateTime) MetaResumen$
+    +CrearDeudaResumen(deuda: Deuda, hoy: DateTime) DeudaResumen$
+}
+
+class ValidadorDeuda {
+    <<static>>
+    +Validar(deuda: Deuda) ResultadoValidacion$
+}
+
+class ValidadorSesion {
+    <<static>>
+    +UsuarioId(sesion: SesionActual) int
+}
+
+class ValidadorSobre {
+    <<static>>
+    +Validar(sobre: Sobre) ResultadoValidacion$
+}
+
+class ResultadoValidacion {
+    -errores: List~string~
+    +Errores: List~string~
+    +EsValido: bool
+    +Mensaje: string
+    +AgregarError(mensaje: string)
+}
+
+class ValidadorMeta {
+    <<static>>
+    +Validar(meta: Meta, esNueva: bool) ResultadoValidacion$
+}
+
+class ValidadorUsuario {
+    <<static>>
+    +ValidarRegistro(nombre: string, correo: string, contrasena: string, confirmacion: string) ResultadoValidacion$
+    +ValidarPerfil(nombre: string) ResultadoValidacion$
+    +CorreoValido(correo: string) bool$
+}
+
+class ValidadorMovimiento {
+    <<static>>
+    +Validar(movimiento: Movimiento) ResultadoValidacion$
+}
+
+class ValidadorPresupuesto {
+    <<static>>
+    +Validar(presupuesto: Presupuesto) ResultadoValidacion$
+}
+
+class FormContrasena {
+    -servicios: FabricaServicios
+    -campoActual: TextBox
+    -campoNueva: TextBox
+    -campoConfirmacion: TextBox
+    -ConstruirInterfaz()
+    -AlGuardar(remitente: object, argumentos: EventArgs)
+    -AlCancelar(remitente: object, argumentos: EventArgs)
+}
+
+class Form
+
+class FormDeuda {
+    -servicios: FabricaServicios
+    -deudaEditada: Deuda
+    -campoAcreedor: TextBox
+    -campoCapital: NumericUpDown
+    -campoSaldo: NumericUpDown
+    -campoTasa: NumericUpDown
+    -campoPagoMinimo: NumericUpDown
+    -campoFecha: DateTimePicker
+    -ConstruirInterfaz()
+    -CrearNumero(x: int, y: int, maximo: decimal) NumericUpDown
+    -CargarDatos()
+    -AlGuardar(remitente: object, argumentos: EventArgs)
+    -AlCancelar(remitente: object, argumentos: EventArgs)
+}
+
+class FormRegistro {
+    -servicios: FabricaServicios
+    -campoNombre: TextBox
+    -campoCorreo: TextBox
+    -campoContrasena: TextBox
+    -campoConfirmacion: TextBox
+    -correoRegistrado: string
+    +CorreoRegistrado: string
+    -ConstruirInterfaz()
+    -AlRegistrar(remitente: object, argumentos: EventArgs)
+    -AlCancelar(remitente: object, argumentos: EventArgs)
+}
+
+class FormAdministracion {
+    -servicios: FabricaServicios
+    -valorCuentas: Label
+    -valorAdministradores: Label
+    -valorUsuarios: Label
+    -valorActivas: Label
+    -valorInactivas: Label
+    -grillaCuentas: DataGridView
+    -grillaAuditoria: DataGridView
+    -ConstruirInterfaz()
+    -ConstruirResumen(pagina: TabPage)
+    -AgregarTarjeta(pagina: TabPage, titulo: string, x: int, y: int, acento: Color) Label
+    -ConstruirCuentas(pagina: TabPage)
+    -ConstruirAuditoria(pagina: TabPage)
+    -ConstruirInformacion(pagina: TabPage)
+    -CargarResumen()
+    -CargarCuentas()
+    -CargarAuditoria()
+    -AlActualizarResumen(remitente: object, argumentos: EventArgs)
+    -AlActualizarCuentas(remitente: object, argumentos: EventArgs)
+    -AlActualizarAuditoria(remitente: object, argumentos: EventArgs)
+    -AlCambiarRol(remitente: object, argumentos: EventArgs)
+    -AlCambiarEstado(remitente: object, argumentos: EventArgs)
+    -AlExportarCuentas(remitente: object, argumentos: EventArgs)
+    -ObtenerCuenta() Usuario
+    -NombreRol(rol: RolUsuario) string$
+    -EstadoTexto(activo: bool) string$
+}
+
+class FormMonto {
+    -campoMonto: NumericUpDown
+    +Monto: decimal
+    -AlAceptar(remitente: object, argumentos: EventArgs)
+    -AlCancelar(remitente: object, argumentos: EventArgs)
+}
+
+class FormPrincipal {
+    -servicios: FabricaServicios
+    -panelContenido: Panel
+    -panelMenu: Panel
+    -etiquetaUsuario: Label
+    -selectorTema: ComboBox
+    -iconoNotificacion: NotifyIcon
+    -cerroSesion: bool
+    -cargandoTema: bool
+    -claveModuloActual: string
+    +CerroSesion: bool
+    -ConstruirInterfaz()
+    -AgregarBotonMenu(texto: string, clave: string, posicion: int)
+    -AlElegirModulo(remitente: object, argumentos: EventArgs)
+    -MostrarModulo(modulo: UserControl)
+    -MostrarModuloPorClave(clave: string)
+    -AlCambiarPerfil(remitente: object, argumentos: EventArgs)
+    -AlCambiarTema(remitente: object, argumentos: EventArgs)
+    -AplicarTemaActual()
+    -ReconstruirInterfaz()
+    -LimpiarControles()
+    -AnchoDelNombre(texto: string) int
+    -AlCerrarSesion(remitente: object, argumentos: EventArgs)
+    -PrepararNotificaciones()
+    #OnFormClosed(e: FormClosedEventArgs)
+    -NombreRol() string
+}
+
+class FormMovimiento {
+    -servicios: FabricaServicios
+    -movimientoEditado: Movimiento
+    -identificadoresSobre: List~int~
+    -campoFecha: DateTimePicker
+    -campoTipo: ComboBox
+    -campoCategoria: TextBox
+    -campoDescripcion: TextBox
+    -campoMonto: NumericUpDown
+    -campoSobre: ComboBox
+    -ConstruirInterfaz()
+    -CargarSobres()
+    -CargarDatos()
+    -AlGuardar(remitente: object, argumentos: EventArgs)
+    -AlCancelar(remitente: object, argumentos: EventArgs)
+}
+
+class FormLogin {
+    -servicios: FabricaServicios
+    -campoCorreo: TextBox
+    -campoContrasena: TextBox
+    -etiquetaEstadoCon: Label
+    -principalCerroSesion: bool
+    -ConstruirInterfaz()
+    #OnShown(e: EventArgs)
+    -ProbarConexion()
+    -AlIniciarSesion(remitente: object, argumentos: EventArgs)
+    -AlCrearCuenta(remitente: object, argumentos: EventArgs)
+    -AbrirPrincipal()
+}
+
+class FormMeta {
+    -servicios: FabricaServicios
+    -metaEditada: Meta
+    -campoNombre: TextBox
+    -campoObjetivo: NumericUpDown
+    -campoActual: NumericUpDown
+    -campoFecha: DateTimePicker
+    -campoPrioridad: ComboBox
+    -ConstruirInterfaz()
+    -CrearNumero(x: int, y: int) NumericUpDown
+    -CargarDatos()
+    -AlGuardar(remitente: object, argumentos: EventArgs)
+    -AlCancelar(remitente: object, argumentos: EventArgs)
+}
+
+class FormPresupuesto {
+    -servicios: FabricaServicios
+    -resumenEditado: PresupuestoResumen
+    -campoCategoria: TextBox
+    -campoLimite: NumericUpDown
+    -etiquetaPeriodo: Label
+    -anio: int
+    -mes: int
+    +FormPresupuesto(fabrica: FabricaServicios, resumen: PresupuestoResumen, anioPeriodo: int, mesPeriodo: int)
+    -ConstruirInterfaz()
+    -CargarDatos()
+    -AlGuardar(remitente: object, argumentos: EventArgs)
+    -AlCancelar(remitente: object, argumentos: EventArgs)
+}
+
+class Program {
+    <<static>>
+    ~Main()$
+}
+
+class FormSobre {
+    -servicios: FabricaServicios
+    -sobreEditado: Sobre
+    -campoNombre: TextBox
+    -campoTipo: ComboBox
+    -campoObjetivo: NumericUpDown
+    -campoMinimo: NumericUpDown
+    -campoMaximo: NumericUpDown
+    -campoDescripcion: TextBox
+    -ConstruirInterfaz()
+    -CrearNumero(x: int, y: int, ancho: int) NumericUpDown
+    -CargarDatos()
+    -AlGuardar(remitente: object, argumentos: EventArgs)
+    -AlCancelar(remitente: object, argumentos: EventArgs)
+}
+
+class UtilidadesVista {
+    <<static>>
+    +PrepararGrilla(grilla: DataGridView)$
+    +PrepararFormulario(formulario: Form)$
+    +EstilizarCampos(contenedor: Control)$
+    +EstilizarCampo(control: Control)$
+    +AplicarEstiloCampo(campo: Control)$
+    +CrearEtiqueta(texto: string, x: int, y: int) Label$
+    +CrearNota(texto: string, x: int, y: int, ancho: int) Label$
+    +CrearTitulo(texto: string, x: int, y: int) Label$
+    +CrearValor(texto: string, x: int, y: int) Label$
+    +CrearCampo(x: int, y: int, ancho: int) TextBox$
+    +CrearLista(x: int, y: int, ancho: int) ComboBox$
+    +CrearBoton(texto: string, x: int, y: int, ancho: int, alto: int, color: Color) Button$
+    +CrearBotonSecundario(texto: string, x: int, y: int, ancho: int, alto: int) Button$
+    +CrearBotonPeligro(texto: string, x: int, y: int, ancho: int, alto: int) Button$
+    +CrearTarjeta(titulo: string, x: int, y: int, ancho: int, alto: int, acento: Color) Panel$
+    +PonerValor(tarjeta: Panel, texto: string)$
+    +ColorContraste(fondo: Color) Color$
+    +ColorDesdeTexto(texto: string) Color$
+    +Moneda(monto: decimal) string$
+    +MonedaCorta(monto: decimal) string$
+    +Porcentaje(valor: decimal) string$
+    +Informar(mensaje: string)$
+    +AvisarError(mensaje: string)$
+    +Confirmar(mensaje: string) bool$
+    +NombreTipoSobre(tipo: int) string$
+    +NombreTipoMovimiento(tipo: int) string$
+    +NombrePrioridad(prioridad: int) string$
+}
+
+class ModuloRespaldos {
+    -resultado: Label
+    -ConstruirInterfaz()
+    -AlExportar(remitente: object, argumentos: EventArgs)
+    -AlImportar(remitente: object, argumentos: EventArgs)
+}
+
+class ModuloDashboard {
+    -tarjetaIngresos: Panel
+    -tarjetaGastos: Panel
+    -tarjetaDisponible: Panel
+    -tarjetaSobres: Panel
+    -tarjetaMetas: Panel
+    -tarjetaDeudas: Panel
+    -etiquetaMes: Label
+    -grillaSobres: DataGridView
+    -grillaAlertas: DataGridView
+    -ConstruirInterfaz()
+    -CargarDatos()
+    -AlActualizar(remitente: object, argumentos: EventArgs)
+}
+
+class ModuloReportes {
+    -ConstruirInterfaz()
+    -AlExportarExcel(remitente: object, argumentos: EventArgs)
+    -AlExportarPdf(remitente: object, argumentos: EventArgs)
+}
+
+class ModuloSimuladores {
+    -campoMeta: ComboBox
+    -campoAhorroMensual: NumericUpDown
+    -resultadoAhorro: Label
+    -campoDeuda: ComboBox
+    -campoPagoMensual: NumericUpDown
+    -resultadoDeuda: Label
+    -ConstruirInterfaz()
+    -CargarMetas()
+    -CargarDeudas()
+    -AlSimularAhorro(remitente: object, argumentos: EventArgs)
+    -AlSimularDeuda(remitente: object, argumentos: EventArgs)
+}
+
+class ModuloBase {
+    #Servicios: FabricaServicios
+    #Acento: Color
+    #Letra: float
+    #Margen: int
+    #MostrarResultado(resultado: Resultado)
+    #MostrarError(error: Exception)
+    #Boton(texto: string, x: int, y: int, ancho: int) Button
+    #BotonSecundario(texto: string, x: int, y: int, ancho: int) Button
+    #BotonPeligro(texto: string, x: int, y: int, ancho: int) Button
+    #FilaCampo(yEtiqueta: int) int
+}
+
+class ModuloPerfil {
+    -usuario: Usuario
+    -campoNombre: TextBox
+    -campoColor: TextBox
+    -campoFuente: NumericUpDown
+    -alertaDeudas: CheckBox
+    -alertaMetas: CheckBox
+    -alertaPresupuesto: CheckBox
+    -alertaSobres: CheckBox
+    -foto: PictureBox
+    -muestraColor: Panel
+    -fotoSeleccionada: byte[]
+    -fotoCambiada: bool
+    -ConstruirInterfaz()
+    -CargarDatos()
+    -AlCambiarColor(remitente: object, argumentos: EventArgs)
+    -AlCargarFoto(remitente: object, argumentos: EventArgs)
+    -AlQuitarFoto(remitente: object, argumentos: EventArgs)
+    -MostrarFoto(datos: byte[])
+    -AlGuardar(remitente: object, argumentos: EventArgs)
+    -AlCambiarContrasena(remitente: object, argumentos: EventArgs)
+    -AvisarCambio()
+    -NombreRol() string
+}
+
+class ModuloPresupuestos {
+    -campoMes: ComboBox
+    -campoAnio: NumericUpDown
+    -grilla: DataGridView
+    -resumen: Label
+    -ConstruirInterfaz()
+    -CargarDatos()
+    -AlCambiarPeriodo(remitente: object, argumentos: EventArgs)
+    -AlNuevo(remitente: object, argumentos: EventArgs)
+    -AlEditar(remitente: object, argumentos: EventArgs)
+    -AlEliminar(remitente: object, argumentos: EventArgs)
+    -AlActualizar(remitente: object, argumentos: EventArgs)
+    -ObtenerSeleccionado() PresupuestoResumen
+}
+
+class ModuloAlertas {
+    -grilla: DataGridView
+    -resumen: Label
+    -ConstruirInterfaz()
+    -CargarDatos()
+    -AlActualizar(remitente: object, argumentos: EventArgs)
+}
+
+class ModuloActividad {
+    -grilla: DataGridView
+    -ConstruirInterfaz()
+    -CargarDatos()
+    -AlActualizar(remitente: object, argumentos: EventArgs)
+}
+
+class ModuloMovimientos {
+    -campoMes: ComboBox
+    -campoAnio: NumericUpDown
+    -campoTipo: ComboBox
+    -campoCategoria: TextBox
+    -campoTexto: TextBox
+    -grilla: DataGridView
+    -etiquetaResumen: Label
+    -ConstruirInterfaz()
+    -CargarDatos()
+    -LeerFiltro() FiltroMovimientos
+    -AlCambiarMes(remitente: object, argumentos: EventArgs)
+    -AlCambiarFiltro(remitente: object, argumentos: EventArgs)
+    -AlFiltrar(remitente: object, argumentos: EventArgs)
+    -AlLimpiar(remitente: object, argumentos: EventArgs)
+    -AlNuevo(remitente: object, argumentos: EventArgs)
+    -AlEditar(remitente: object, argumentos: EventArgs)
+    -AlEliminar(remitente: object, argumentos: EventArgs)
+    -AlActualizar(remitente: object, argumentos: EventArgs)
+    -ObtenerSeleccionado() Movimiento
+}
+
+class ModuloSobres {
+    -grilla: DataGridView
+    -ConstruirInterfaz()
+    -CargarDatos()
+    -AlNuevo(remitente: object, argumentos: EventArgs)
+    -AlEditar(remitente: object, argumentos: EventArgs)
+    -AlEliminar(remitente: object, argumentos: EventArgs)
+    -AlActualizar(remitente: object, argumentos: EventArgs)
+    -ObtenerSeleccionado() Sobre
+}
+
+class ModuloAnalisis {
+    -campoMes: ComboBox
+    -campoAnio: NumericUpDown
+    -tarjetaIngresos: Panel
+    -tarjetaGastos: Panel
+    -tarjetaAhorro: Panel
+    -tarjetaPorcentaje: Panel
+    -grillaGastos: DataGridView
+    -grillaIngresos: DataGridView
+    -grillaMeses: DataGridView
+    -ConstruirInterfaz()
+    -CrearGrilla(x: int, y: int, ancho: int) DataGridView
+    -CargarMeses()
+    -AlConsultar(remitente: object, argumentos: EventArgs)
+    -Consultar()
+    -CargarUltimosMeses()
+}
+
+class ModuloMetas {
+    -grilla: DataGridView
+    -ConstruirInterfaz()
+    -CargarDatos()
+    -AlNueva(remitente: object, argumentos: EventArgs)
+    -AlEditar(remitente: object, argumentos: EventArgs)
+    -AlAportar(remitente: object, argumentos: EventArgs)
+    -AlEliminar(remitente: object, argumentos: EventArgs)
+    -AlActualizar(remitente: object, argumentos: EventArgs)
+    -ObtenerSeleccionada() MetaResumen
+}
+
+class ModuloDeudas {
+    -grilla: DataGridView
+    -total: Label
+    -ConstruirInterfaz()
+    -CargarDatos()
+    -AlNueva(remitente: object, argumentos: EventArgs)
+    -AlEditar(remitente: object, argumentos: EventArgs)
+    -AlAbonar(remitente: object, argumentos: EventArgs)
+    -AlEliminar(remitente: object, argumentos: EventArgs)
+    -AlActualizar(remitente: object, argumentos: EventArgs)
+    -ObtenerSeleccionada() DeudaResumen
+}
+
+class UserControl
+
+class ConexionBD {
+    -cadenaConexion: string
+    +CadenaConexion: string
+    +Abrir() NpgsqlConnection
+    +Probar()
+    +LeerCadenaConexion() string$
+}
+
+class IRepositorioMetas {
+    <<interface>>
+    -ListarPorUsuario(usuarioId: int) List~Meta~
+    -BuscarPorId(id: int, usuarioId: int) Meta
+    -Agregar(meta: Meta) int
+    -Actualizar(meta: Meta)
+    -Eliminar(id: int, usuarioId: int)
+}
+
+class IRepositorioPresupuestos {
+    <<interface>>
+    -ListarPorUsuario(usuarioId: int) List~Presupuesto~
+    -ListarPorPeriodo(usuarioId: int, anio: int, mes: int) List~Presupuesto~
+    -BuscarPorCategoria(usuarioId: int, anio: int, mes: int, categoria: string) Presupuesto
+    -Guardar(presupuesto: Presupuesto) int
+    -Eliminar(id: int, usuarioId: int) bool
+}
+
+class IRepositorioDeudas {
+    <<interface>>
+    -ListarPorUsuario(usuarioId: int) List~Deuda~
+    -BuscarPorId(id: int, usuarioId: int) Deuda
+    -Agregar(deuda: Deuda) int
+    -Actualizar(deuda: Deuda)
+    -Eliminar(id: int, usuarioId: int)
+}
+
+class IRepositorioActividad {
+    <<interface>>
+    -Registrar(usuarioId: int, accion: string)
+    -ListarRecientes(usuarioId: int, limite: int) List~RegistroActividad~
+}
+
+class IRepositorioAutenticacion {
+    <<interface>>
+    -BuscarPorCorreo(correo: string) Usuario
+    -ExisteCorreo(correo: string, idExcluido: int) bool
+    -ContarTodos() int
+    -Agregar(usuario: Usuario) int
+    -RegistrarIntentoFallido(id: int, intentos: int, bloqueadoHasta: DateTime)
+    -ReiniciarIntentos(id: int)
+}
+
+class IRepositorioPerfil {
+    <<interface>>
+    -BuscarPorId(id: int) Usuario
+    -ExisteCorreo(correo: string, idExcluido: int) bool
+    -ActualizarPerfil(usuario: Usuario)
+    -ActualizarTema(id: int, tema: TemaVisual)
+    -ActualizarContrasena(id: int, hash: string, sal: string)
+}
+
+class IRepositorioAdministracion {
+    <<interface>>
+    -BuscarPorId(id: int) Usuario
+    -ListarTodos() List~Usuario~
+    -ContarAdministradoresActivos() int
+    -ActualizarRolYEstado(id: int, rol: RolUsuario, activo: bool)
+}
+
+class IRepositorioSobres {
+    <<interface>>
+    -ListarPorUsuario(usuarioId: int) List~Sobre~
+    -BuscarPorId(id: int, usuarioId: int) Sobre
+    -Agregar(sobre: Sobre) int
+    -Actualizar(sobre: Sobre)
+    -Eliminar(id: int, usuarioId: int)
+}
+
+class IGeneradorReportes {
+    <<interface>>
+    -ExportarExcel(ruta: string, sobres: List~Sobre~, movimientos: List~Movimiento~, metas: List~Meta~, deudas: List~Deuda~)
+    -ExportarPdf(ruta: string, nombreUsuario: string, sobres: List~Sobre~, movimientos: List~Movimiento~, metas: List~Meta~, deudas: List~Deuda~)
+}
+
+class IServicioRespaldo {
+    <<interface>>
+    -Exportar(usuarioId: int, correo: string, ruta: string) ResumenRespaldoDatos
+    -Importar(usuarioId: int, ruta: string) ResumenRespaldoDatos
+}
+
+class IExportadorCuentas {
+    <<interface>>
+    -Exportar(usuarios: List~Usuario~, ruta: string)
+}
+
+class IRepositorioAuditoria {
+    <<interface>>
+    -Registrar(administradorId: int, accion: string, detalle: string)
+    -ListarRecientes(limite: int) List~RegistroAuditoria~
+}
+
+class IRepositorioMovimientos {
+    <<interface>>
+    -ListarPorUsuario(usuarioId: int) List~Movimiento~
+    -ListarFiltrados(usuarioId: int, filtro: FiltroMovimientos) List~Movimiento~
+    -BuscarPorId(id: int, usuarioId: int) Movimiento
+    -Agregar(movimiento: Movimiento) int
+    -Actualizar(movimiento: Movimiento)
+    -Eliminar(id: int, usuarioId: int)
+}
+
+class ErrorRespaldo {
+}
+
+class ErrorBaseDatos {
+}
+
+class ExportadorCuentasCsv {
+    +Exportar(usuarios: List~Usuario~, ruta: string)
+    -Escapar(texto: string) string$
+}
+
+class GeneradorReportes {
+    -fuentesConfiguradas: bool$
+    +ExportarExcel(ruta: string, sobres: List~Sobre~, movimientos: List~Movimiento~, metas: List~Meta~, deudas: List~Deuda~)
+    +ExportarPdf(ruta: string, nombreUsuario: string, sobres: List~Sobre~, movimientos: List~Movimiento~, metas: List~Meta~, deudas: List~Deuda~)
+    -NombrePrioridad(prioridad: PrioridadMeta) string$
+    -PintarEncabezados(hoja: IXLWorksheet)$
+    -FormatearMontos(hoja: IXLWorksheet, primeraColumna: int)$
+    -ConfigurarFuentes()$
+}
+
+class LienzoPdf {
+    -documento: PdfDocument
+    -pagina: PdfPage
+    -dibujo: XGraphics
+    -fuenteNormal: XFont
+    -posicionY: double
+    -numeroPagina: int
+    +Escribir(texto: string, fuente: XFont)
+    +Guardar(ruta: string)
+    -CrearPagina()
+}
+
+class RepositorioAuditoriaPostgres {
+    -conexionBD: ConexionBD
+    +Registrar(administradorId: int, accion: string, detalle: string)
+    +ListarRecientes(limite: int) List~RegistroAuditoria~
+}
+
+class RepositorioMovimientosPostgres {
+    -conexionBD: ConexionBD
+    +ListarPorUsuario(usuarioId: int) List~Movimiento~
+    +ListarFiltrados(usuarioId: int, filtro: FiltroMovimientos) List~Movimiento~
+    +BuscarPorId(id: int, usuarioId: int) Movimiento
+    +Agregar(movimiento: Movimiento) int
+    +Actualizar(movimiento: Movimiento)
+    +Eliminar(id: int, usuarioId: int)
+    -Mapear(lector: NpgsqlDataReader) Movimiento
+}
+
+class RepositorioPresupuestosPostgres {
+    -conexionBD: ConexionBD
+    +ListarPorUsuario(usuarioId: int) List~Presupuesto~
+    +ListarPorPeriodo(usuarioId: int, anio: int, mes: int) List~Presupuesto~
+    +BuscarPorCategoria(usuarioId: int, anio: int, mes: int, categoria: string) Presupuesto
+    +Guardar(presupuesto: Presupuesto) int
+    +Eliminar(id: int, usuarioId: int) bool
+    -Mapear(lector: NpgsqlDataReader) Presupuesto
+}
+
+class RepositorioActividadPostgres {
+    -conexionBD: ConexionBD
+    +Registrar(usuarioId: int, accion: string)
+    +ListarRecientes(usuarioId: int, limite: int) List~RegistroActividad~
+}
+
+class RepositorioUsuariosPostgres {
+    -conexionBD: ConexionBD
+    +BuscarPorId(id: int) Usuario
+    +BuscarPorCorreo(correo: string) Usuario
+    +ExisteCorreo(correo: string, idExcluido: int) bool
+    +ListarTodos() List~Usuario~
+    +ContarTodos() int
+    +ContarAdministradoresActivos() int
+    +Agregar(usuario: Usuario) int
+    +ActualizarPerfil(usuario: Usuario)
+    +ActualizarTema(id: int, tema: TemaVisual)
+    +ActualizarRolYEstado(id: int, rol: RolUsuario, activo: bool)
+    +ActualizarContrasena(id: int, hash: string, sal: string)
+    +RegistrarIntentoFallido(id: int, intentos: int, bloqueadoHasta: DateTime)
+    +ReiniciarIntentos(id: int)
+    -Mapear(lector: NpgsqlDataReader) Usuario
+}
+
+class RepositorioDeudasPostgres {
+    -conexionBD: ConexionBD
+    +ListarPorUsuario(usuarioId: int) List~Deuda~
+    +BuscarPorId(id: int, usuarioId: int) Deuda
+    +Agregar(deuda: Deuda) int
+    +Actualizar(deuda: Deuda)
+    +Eliminar(id: int, usuarioId: int)
+    -Mapear(lector: NpgsqlDataReader) Deuda
+}
+
+class RepositorioMetasPostgres {
+    -conexionBD: ConexionBD
+    +ListarPorUsuario(usuarioId: int) List~Meta~
+    +BuscarPorId(id: int, usuarioId: int) Meta
+    +Agregar(meta: Meta) int
+    +Actualizar(meta: Meta)
+    +Eliminar(id: int, usuarioId: int)
+    -Mapear(lector: NpgsqlDataReader) Meta
+}
+
+class RepositorioSobresPostgres {
+    -conexionBD: ConexionBD
+    +ListarPorUsuario(usuarioId: int) List~Sobre~
+    +BuscarPorId(id: int, usuarioId: int) Sobre
+    +Agregar(sobre: Sobre) int
+    +Actualizar(sobre: Sobre)
+    +Eliminar(id: int, usuarioId: int)
+    -Mapear(lector: NpgsqlDataReader) Sobre
+}
+
+class ResumenRespaldoDatos {
+    +Sobres: int
+    +Movimientos: int
+    +Metas: int
+    +Deudas: int
+    +Total: int
+}
+
+class ServicioRespaldoJson {
+    -conexionBD: ConexionBD
+    +Exportar(usuarioId: int, correo: string, ruta: string) ResumenRespaldoDatos
+    +Importar(usuarioId: int, ruta: string) ResumenRespaldoDatos
+    -Contar(archivo: RespaldoArchivo) ResumenRespaldoDatos$
+    -BorrarDatosDeCuenta(conexion: NpgsqlConnection, transaccion: NpgsqlTransaction, usuarioId: int)$
+    -InsertarSobre(conexion: NpgsqlConnection, transaccion: NpgsqlTransaction, usuarioId: int, sobre: SobreRespaldo) int$
+    -InsertarMovimiento(conexion: NpgsqlConnection, transaccion: NpgsqlTransaction, usuarioId: int, sobreId: int, movimiento: MovimientoRespaldo)$
+    -InsertarMeta(conexion: NpgsqlConnection, transaccion: NpgsqlTransaction, usuarioId: int, meta: MetaRespaldo)$
+    -InsertarDeuda(conexion: NpgsqlConnection, transaccion: NpgsqlTransaction, usuarioId: int, deuda: DeudaRespaldo)$
+    -LeerSobres(conexion: NpgsqlConnection, usuarioId: int) List~SobreRespaldo~$
+    -LeerMovimientos(conexion: NpgsqlConnection, usuarioId: int) List~MovimientoRespaldo~$
+    -LeerMetas(conexion: NpgsqlConnection, usuarioId: int) List~MetaRespaldo~$
+    -LeerDeudas(conexion: NpgsqlConnection, usuarioId: int) List~DeudaRespaldo~$
+    -TextoLimpio(texto: string) string$
+    -TextoAPrioridad(valor: int) PrioridadMeta$
+}
+
+class RespaldoArchivo {
+    +Version: int
+    +ExportadoEn: DateTime
+    +Correo: string
+    +Sobres: List~SobreRespaldo~
+    +Movimientos: List~MovimientoRespaldo~
+    +Metas: List~MetaRespaldo~
+    +Deudas: List~DeudaRespaldo~
+    +PrepararListas()
+}
+
+class SobreRespaldo {
+    +Id: int
+    +Nombre: string
+    +Tipo: int
+    +PorcentajeObjetivo: decimal
+    +PorcentajeMinimo: decimal
+    +PorcentajeMaximo: decimal
+    +Saldo: decimal
+    +Descripcion: string
+    +Activo: bool
+}
+
+class MovimientoRespaldo {
+    +Id: int
+    +SobreId: int
+    +Tipo: int
+    +Categoria: string
+    +Descripcion: string
+    +Monto: decimal
+    +Fecha: DateTime
+}
+
+class MetaRespaldo {
+    +Id: int
+    +Nombre: string
+    +MontoObjetivo: decimal
+    +MontoActual: decimal
+    +FechaLimite: DateTime
+    +Prioridad: int
+}
+
+class DeudaRespaldo {
+    +Id: int
+    +Acreedor: string
+    +Capital: decimal
+    +Saldo: decimal
+    +TasaInteres: decimal
+    +PagoMinimo: decimal
+    +FechaVencimiento: DateTime
+}
+
+class ConvertidorDatos {
+    <<static>>
+    +Texto(valor: object) string$
+    +Entero(valor: object) int$
+    +Numero(valor: object) decimal$
+    +Booleano(valor: object) bool$
+    +Fecha(valor: object) DateTime$
+    +Bytes(valor: object) byte[]$
+    +FechaONulo(valor: DateTime) object$
+    +FechaHora(valor: DateTime) object$
+    +FechaDia(valor: DateTime) object$
+    +RolATexto(rol: RolUsuario) string$
+    +TextoARol(texto: string) RolUsuario$
+    +PrioridadATexto(prioridad: PrioridadMeta) string$
+    +TextoAPrioridad(texto: string) PrioridadMeta$
+    +TemaATexto(tema: TemaVisual) string$
+    +TextoATema(texto: string) TemaVisual$
+}
+
+class Tema {
+    <<abstract>>
+    +Nombre: string
+    +Visual: TemaVisual
+    +Fondo: Color
+    +Superficie: Color
+    +SuperficieAlterna: Color
+    +Texto: Color
+    +TextoSecundario: Color
+    +Borde: Color
+    +Cabecera: Color
+    +CabeceraTexto: Color
+    +CabeceraSuave: Color
+    +Menu: Color
+    +MenuTexto: Color
+    +Peligro: Color
+    +Exito: Color
+    +AcentoVisible(acento: Color) Color
+}
+
+class TemaClaro {
+    +Nombre: string
+    +Visual: TemaVisual
+}
+
+class TemaOscuro {
+    +Nombre: string
+    +Visual: TemaVisual
+    +AcentoVisible(acento: Color) Color
+}
+
+class TemaContraste {
+    +Nombre: string
+    +Visual: TemaVisual
+    +AcentoVisible(acento: Color) Color
+}
+
+class CatalogoTemas {
+    <<static>>
+    +Listar() List~Tema~$
+    +Buscar(visual: TemaVisual) Tema$
+}
+
+class TemaActual {
+    <<static>>
+    +Actual: Tema
+    +Acento: Color
+    +Cambiar(tema: Tema)$
+    +Cambiar(visual: TemaVisual)$
+}
+
+Tema <|-- TemaClaro : hereda
+Tema <|-- TemaOscuro : hereda
+Tema <|-- TemaContraste : hereda
+CatalogoTemas ..> Tema : crea
+TemaActual ..> Tema : guarda
+FormPrincipal ..> CatalogoTemas : lista
+FormPrincipal ..> TemaActual : aplica
+UtilidadesVista ..> TemaActual : lee colores
+ModuloBase ..> TemaActual : lee colores
+
+ResumenMensual "1 [GastosPorCategoria]" -- "N" DetalleCategoria : GastosPorCategoria
+ResumenMensual "1 [IngresosPorCategoria]" -- "N" DetalleCategoria : IngresosPorCategoria
+ResumenDashboard "1 [Sobres]" -- "N" SobreResumen : Sobres
+ResumenDashboard "1 [Alertas]" -- "N" Alerta : Alertas
+ValidadorSesion ..> SesionActual : exige sesion
+ValidadorDeuda "1 [Validar()]" --> "1" ResultadoValidacion : Validar
+ValidadorSobre "1 [Validar()]" --> "1" ResultadoValidacion : Validar
+ValidadorMeta "1 [Validar()]" --> "1" ResultadoValidacion : Validar
+ValidadorUsuario "1 [ValidarRegistro()]" --> "1" ResultadoValidacion : ValidarRegistro
+ValidadorUsuario "1 [ValidarPerfil()]" --> "1" ResultadoValidacion : ValidarPerfil
+ValidadorMovimiento "1 [Validar()]" --> "1" ResultadoValidacion : Validar
+ValidadorPresupuesto "1 [Validar()]" --> "1" ResultadoValidacion : Validar
+Form <|-- FormContrasena : inherit
+Form <|-- FormDeuda : inherit
+Form <|-- FormRegistro : inherit
+Form <|-- FormAdministracion : inherit
+Form <|-- FormMonto : inherit
+Form <|-- FormPrincipal : inherit
+Form <|-- FormMovimiento : inherit
+Form <|-- FormLogin : inherit
+Form <|-- FormMeta : inherit
+Form <|-- FormPresupuesto : inherit
+Form <|-- FormSobre : inherit
+ModuloBase <|-- ModuloRespaldos : inherit
+ModuloBase <|-- ModuloDashboard : inherit
+ModuloBase <|-- ModuloReportes : inherit
+ModuloBase <|-- ModuloSimuladores : inherit
+UserControl <|-- ModuloBase : inherit
+ModuloBase <|-- ModuloPerfil : inherit
+ModuloBase <|-- ModuloPresupuestos : inherit
+ModuloBase <|-- ModuloAlertas : inherit
+ModuloBase <|-- ModuloActividad : inherit
+ModuloBase <|-- ModuloMovimientos : inherit
+ModuloBase <|-- ModuloSobres : inherit
+ModuloBase <|-- ModuloAnalisis : inherit
+ModuloBase <|-- ModuloMetas : inherit
+ModuloBase <|-- ModuloDeudas : inherit
+Exception <|-- ErrorRespaldo : inherit
+Exception <|-- ErrorBaseDatos : inherit
+ServicioRespaldoJson "1 [Exportar()]" --> "1" ResumenRespaldoDatos : Exportar
+ServicioRespaldoJson "1 [Importar()]" --> "1" ResumenRespaldoDatos : Importar
+RespaldoArchivo "1 [Sobres]" -- "N" SobreRespaldo : Sobres
+RespaldoArchivo "1 [Movimientos]" -- "N" MovimientoRespaldo : Movimientos
+RespaldoArchivo "1 [Metas]" -- "N" MetaRespaldo : Metas
+RespaldoArchivo "1 [Deudas]" -- "N" DeudaRespaldo : Deudas
+style Form fill:#f0f0f080,stroke:#cccccc80,color:#00000080
+style UserControl fill:#f0f0f080,stroke:#cccccc80,color:#00000080
+style Exception fill:#f0f0f080,stroke:#cccccc80,color:#00000080
+```

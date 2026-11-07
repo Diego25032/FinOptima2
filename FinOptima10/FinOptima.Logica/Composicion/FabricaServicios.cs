@@ -23,7 +23,6 @@ namespace FinOptima.Logica.Composicion
         public ServicioPresupuestos Presupuestos { get; private set; }
         public ServicioAlertas Alertas { get; private set; }
         public ServicioDashboard Dashboard { get; private set; }
-        public ServicioOptimizacion Optimizacion { get; private set; }
         public ServicioAnalisis Analisis { get; private set; }
         public ServicioSimuladores Simuladores { get; private set; }
         public ServicioPerfil Perfil { get; private set; }
@@ -51,7 +50,7 @@ namespace FinOptima.Logica.Composicion
         {
             conexion = conexionBaseDatos;
 
-            IRepositorioUsuarios repositorioUsuarios = new RepositorioUsuariosPostgres(conexion);
+            RepositorioUsuariosPostgres repositorioUsuarios = new RepositorioUsuariosPostgres(conexion);
             IRepositorioSobres repositorioSobres = new RepositorioSobresPostgres(conexion);
             IRepositorioMovimientos repositorioMovimientos = new RepositorioMovimientosPostgres(conexion);
             IRepositorioMetas repositorioMetas = new RepositorioMetasPostgres(conexion);
@@ -74,7 +73,6 @@ namespace FinOptima.Logica.Composicion
             Presupuestos = new ServicioPresupuestos(repositorioPresupuestos, repositorioMovimientos, Sesion);
             Alertas = new ServicioAlertas(repositorioMetas, repositorioDeudas, repositorioMovimientos, repositorioSobres, Presupuestos, Sesion);
             Dashboard = new ServicioDashboard(repositorioMovimientos, repositorioSobres, repositorioMetas, repositorioDeudas, Alertas, Sesion);
-            Optimizacion = new ServicioOptimizacion();
             Analisis = new ServicioAnalisis(repositorioMovimientos, Sesion);
             Simuladores = new ServicioSimuladores();
             Perfil = new ServicioPerfil(repositorioUsuarios, Sesion);

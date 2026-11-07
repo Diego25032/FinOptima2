@@ -1,0 +1,140 @@
+```mermaid
+%% FinOptima - validaciones, seguridad, utilidades y catalogos (capa Logica)
+classDiagram
+    direction LR
+
+    class ResultadoValidacion {
+        +List Errores
+        +bool EsValido
+        +string Mensaje
+        +AgregarError(mensaje)
+    }
+
+    class ValidadorUsuario {
+        <<static>>
+        +ValidarRegistro(nombre, correo, contrasena, confirmacion) ResultadoValidacion
+        +ValidarPerfil(nombre) ResultadoValidacion
+        +CorreoValido(correo) bool
+    }
+
+    class ValidadorSobre {
+        <<static>>
+        +Validar(sobre) ResultadoValidacion
+    }
+
+    class ValidadorMovimiento {
+        <<static>>
+        +Validar(movimiento) ResultadoValidacion
+    }
+
+    class ValidadorMeta {
+        <<static>>
+        +Validar(meta, esNueva) ResultadoValidacion
+    }
+
+    class ValidadorDeuda {
+        <<static>>
+        +Validar(deuda) ResultadoValidacion
+    }
+
+    class ValidadorPresupuesto {
+        <<static>>
+        +Validar(presupuesto) ResultadoValidacion
+    }
+
+    class ValidadorSesion {
+        <<static>>
+        +UsuarioId(sesion) int
+    }
+
+    class HashContrasena {
+        <<static>>
+        +CrearSal() string
+        +Calcular(contrasena, sal) string
+        +Verificar(contrasena, sal, hashGuardado) bool
+    }
+
+    class PoliticaBloqueo {
+        <<static>>
+        +int MaximoIntentos
+        +int MinutosBloqueo
+        +EstaBloqueada(bloqueadoHasta, ahora) bool
+        +CalcularBloqueo(intentos, ahora) DateTime
+        +MinutosRestantes(bloqueadoHasta, ahora) int
+    }
+
+    class PoliticaContrasena {
+        <<static>>
+        +int LongitudMinima
+        +Validar(contrasena) ResultadoValidacion
+    }
+
+    class CalculadoraResumenes {
+        <<static>>
+        +ProgresoMeta(meta) decimal
+        +CrearMetaResumen(meta, hoy) MetaResumen
+        +CrearDeudaResumen(deuda, hoy) DeudaResumen
+    }
+
+    class CalendarioFinanciero {
+        <<static>>
+        +NombreMes(mes) string
+        +EstaEnMes(fecha, anio, mes) bool
+        +DiasHasta(fecha, referencia) int
+    }
+
+    class CatalogoSobresPredeterminados {
+        <<static>>
+        +Crear(usuarioId) List~Sobre~
+    }
+
+    class ErrorAplicacion {
+        <<exception>>
+        +ErrorAplicacion(mensaje)
+        +ErrorAplicacion(mensaje, errorInterno)
+    }
+
+    class Exception {
+        <<sistema>>
+    }
+
+    class Meta {
+        <<entidad>>
+    }
+    class Deuda {
+        <<entidad>>
+    }
+    class Sobre {
+        <<entidad>>
+    }
+    class RolesYTipos {
+        <<enums>>
+    }
+
+    ValidadorUsuario ..> ResultadoValidacion : devuelve
+    ValidadorSobre ..> ResultadoValidacion : devuelve
+    ValidadorMovimiento ..> ResultadoValidacion : devuelve
+    ValidadorMeta ..> ResultadoValidacion : devuelve
+    ValidadorDeuda ..> ResultadoValidacion : devuelve
+    ValidadorPresupuesto ..> ResultadoValidacion : devuelve
+    ValidadorUsuario ..> PoliticaContrasena : usa
+    PoliticaContrasena ..> ResultadoValidacion : devuelve
+
+    CalculadoraResumenes ..> Meta : lee
+    CalculadoraResumenes ..> Deuda : lee
+    CatalogoSobresPredeterminados ..> Sobre : crea
+    CatalogoSobresPredeterminados ..> RolesYTipos : usa
+    ErrorAplicacion --|> Exception : hereda
+
+    note for ValidadorUsuario "Lo llaman ServicioAutenticacion y ServicioPerfil."
+    note for ValidadorSobre "Lo llama ServicioSobres."
+    note for ValidadorMovimiento "Lo llama ServicioMovimientos."
+    note for ValidadorMeta "Lo llama ServicioMetas."
+    note for ValidadorDeuda "Lo llama ServicioDeudas."
+    note for ValidadorPresupuesto "Lo llama ServicioPresupuestos."
+    note for ValidadorSesion "Un solo lugar comprueba que haya sesion antes de devolver el UsuarioId. Lo usan los servicios financieros."
+    note for HashContrasena "PBKDF2 con sal aleatoria por usuario. No guarda la contrasena en texto plano."
+    note for PoliticaBloqueo "5 intentos fallidos bloquean la cuenta 15 minutos."
+    note for PoliticaContrasena "Minimo 8 caracteres."
+    note for ErrorAplicacion "La lanza ValidadorSesion cuando no hay sesion activa y algunos servicios cuando falta un permiso o un dato imprescindible."
+```

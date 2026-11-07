@@ -6,6 +6,7 @@ using FinOptima.Entidades.Entidades;
 using FinOptima.Entidades.Enums;
 using FinOptima.Logica.Composicion;
 using FinOptima.Logica.Modelos;
+using FinOptima.Vista.Temas;
 using FinOptima.Vista.Utilidades;
 
 namespace FinOptima.Vista
@@ -35,26 +36,21 @@ namespace FinOptima.Vista
         private void ConstruirInterfaz()
         {
             Text = "Movimiento";
-            StartPosition = FormStartPosition.CenterParent;
-            ClientSize = new Size(470, 420);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
-            BackColor = Color.White;
-            Font = new Font("Segoe UI", 10);
+            ClientSize = new Size(470, 420);
 
             Controls.Add(UtilidadesVista.CrearEtiqueta("Fecha", 24, 20));
             campoFecha = new DateTimePicker();
             campoFecha.Location = new Point(24, 42);
             campoFecha.Width = 180;
             campoFecha.Format = DateTimePickerFormat.Short;
+            UtilidadesVista.AplicarEstiloCampo(campoFecha);
             Controls.Add(campoFecha);
 
             Controls.Add(UtilidadesVista.CrearEtiqueta("Tipo", 232, 20));
-            campoTipo = new ComboBox();
-            campoTipo.Location = new Point(232, 42);
-            campoTipo.Width = 200;
-            campoTipo.DropDownStyle = ComboBoxStyle.DropDownList;
+            campoTipo = UtilidadesVista.CrearLista(232, 42, 200);
             campoTipo.Items.Add(TipoMovimiento.Ingreso);
             campoTipo.Items.Add(TipoMovimiento.Gasto);
             Controls.Add(campoTipo);
@@ -70,40 +66,34 @@ namespace FinOptima.Vista
             campoMonto.DecimalPlaces = 2;
             campoMonto.Maximum = 1000000000;
             campoMonto.Increment = 1000;
+            UtilidadesVista.AplicarEstiloCampo(campoMonto);
             Controls.Add(campoMonto);
 
             Controls.Add(UtilidadesVista.CrearEtiqueta("Sobre", 24, 140));
-            campoSobre = new ComboBox();
-            campoSobre.Location = new Point(24, 162);
-            campoSobre.Width = 408;
-            campoSobre.DropDownStyle = ComboBoxStyle.DropDownList;
+            campoSobre = UtilidadesVista.CrearLista(24, 162, 408);
             Controls.Add(campoSobre);
 
             Controls.Add(UtilidadesVista.CrearEtiqueta("Descripcion", 24, 200));
-            campoDescripcion = new TextBox();
-            campoDescripcion.Location = new Point(24, 222);
-            campoDescripcion.Width = 408;
+            campoDescripcion = UtilidadesVista.CrearCampo(24, 222, 408);
             campoDescripcion.Height = 60;
             campoDescripcion.Multiline = true;
             Controls.Add(campoDescripcion);
 
-            Label nota = new Label();
-            nota.Text = "Un ingreso suma al saldo del sobre y un gasto lo reduce.";
-            nota.Location = new Point(24, 288);
-            nota.AutoSize = true;
-            nota.ForeColor = Color.FromArgb(90, 100, 115);
-            Controls.Add(nota);
+            Controls.Add(UtilidadesVista.CrearNota("Un ingreso suma al saldo del sobre y un gasto lo reduce.", 24, 292, 408));
 
-            Button guardar = UtilidadesVista.CrearBoton("Guardar", 24, 330, 190, 38, Color.FromArgb(47, 111, 237));
+            Button guardar = UtilidadesVista.CrearBoton("Guardar", 24, 335, 190, 38, TemaActual.Acento);
             guardar.Click += AlGuardar;
             Controls.Add(guardar);
 
-            Button cancelar = UtilidadesVista.CrearBoton("Cancelar", 244, 330, 190, 38, Color.FromArgb(90, 100, 115));
+            Button cancelar = UtilidadesVista.CrearBotonSecundario("Cancelar", 244, 335, 190, 38);
             cancelar.Click += AlCancelar;
             Controls.Add(cancelar);
 
             AcceptButton = guardar;
             CancelButton = cancelar;
+
+            UtilidadesVista.PrepararFormulario(this);
+            UtilidadesVista.EstilizarCampos(this);
         }
 
         private void CargarSobres()

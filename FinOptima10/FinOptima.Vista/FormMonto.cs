@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using FinOptima.Vista.Temas;
 using FinOptima.Vista.Utilidades;
 
 namespace FinOptima.Vista
@@ -17,36 +18,35 @@ namespace FinOptima.Vista
         public FormMonto(string titulo, string descripcion, decimal maximo)
         {
             Text = titulo;
-            StartPosition = FormStartPosition.CenterParent;
-            ClientSize = new Size(400, 190);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
-            BackColor = Color.White;
-            Font = new Font("Segoe UI", 10);
+            ClientSize = new Size(400, 210);
 
-            Label rotulo = UtilidadesVista.CrearEtiqueta(descripcion, 24, 20);
-            rotulo.Width = 350;
+            Label rotulo = UtilidadesVista.CrearNota(descripcion, 24, 20, 350);
             Controls.Add(rotulo);
 
             campoMonto = new NumericUpDown();
-            campoMonto.Location = new Point(24, 54);
+            campoMonto.Location = new Point(24, 70);
             campoMonto.Width = 350;
             campoMonto.DecimalPlaces = 2;
             campoMonto.Maximum = maximo;
             campoMonto.Increment = 10000;
             Controls.Add(campoMonto);
 
-            Button aceptar = UtilidadesVista.CrearBoton("Aceptar", 24, 115, 170, 38, Color.FromArgb(47, 111, 237));
+            Button aceptar = UtilidadesVista.CrearBoton("Aceptar", 24, 125, 170, 38, TemaActual.Acento);
             aceptar.Click += AlAceptar;
             Controls.Add(aceptar);
 
-            Button cancelar = UtilidadesVista.CrearBoton("Cancelar", 204, 115, 170, 38, Color.FromArgb(90, 100, 115));
+            Button cancelar = UtilidadesVista.CrearBotonSecundario("Cancelar", 204, 125, 170, 38);
             cancelar.Click += AlCancelar;
             Controls.Add(cancelar);
 
             AcceptButton = aceptar;
             CancelButton = cancelar;
+
+            UtilidadesVista.PrepararFormulario(this);
+            UtilidadesVista.EstilizarCampos(this);
         }
 
         private void AlAceptar(object remitente, EventArgs argumentos)

@@ -17,6 +17,7 @@ namespace FinOptima.Entidades.Entidades
         public DateTime CreadoEn { get; set; }
         public string ColorAcento { get; set; }
         public int TamanoFuente { get; set; }
+        public TemaVisual Tema { get; set; }
         public bool AlertasDeudas { get; set; }
         public bool AlertasMetas { get; set; }
         public bool AlertasPresupuesto { get; set; }
@@ -37,6 +38,7 @@ namespace FinOptima.Entidades.Entidades
             CreadoEn = DateTime.Now;
             ColorAcento = "#2F6FED";
             TamanoFuente = 10;
+            Tema = TemaVisual.Claro;
             AlertasDeudas = true;
             AlertasMetas = true;
             AlertasPresupuesto = true;

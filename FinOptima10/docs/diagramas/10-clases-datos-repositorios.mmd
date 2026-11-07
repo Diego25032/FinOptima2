@@ -1,0 +1,188 @@
+```mermaid
+%% FinOptima - repositorios PostgreSQL y utilidades de la capa Datos
+classDiagram
+    direction LR
+
+    class RepositorioUsuariosPostgres {
+        +BuscarPorId(id) Usuario
+        +BuscarPorCorreo(correo) Usuario
+        +ExisteCorreo(correo, idExcluido) bool
+        +ListarTodos() List~Usuario~
+        +ContarTodos() int
+        +ContarAdministradoresActivos() int
+        +Agregar(usuario) int
+        +ActualizarPerfil(usuario)
+        +ActualizarTema(id, tema)
+        +ActualizarRolYEstado(id, rol, activo)
+        +ActualizarContrasena(id, hash, sal)
+        +RegistrarIntentoFallido(id, intentos, bloqueadoHasta)
+        +ReiniciarIntentos(id)
+    }
+
+    class RepositorioSobresPostgres {
+        +ListarPorUsuario(usuarioId) List~Sobre~
+        +BuscarPorId(id, usuarioId) Sobre
+        +Agregar(sobre) int
+        +Actualizar(sobre)
+        +Eliminar(id, usuarioId)
+    }
+
+    class RepositorioMovimientosPostgres {
+        +ListarPorUsuario(usuarioId) List~Movimiento~
+        +ListarFiltrados(usuarioId, filtro) List~Movimiento~
+        +BuscarPorId(id, usuarioId) Movimiento
+        +Agregar(movimiento) int
+        +Actualizar(movimiento)
+        +Eliminar(id, usuarioId)
+    }
+
+    class RepositorioMetasPostgres {
+        +ListarPorUsuario(usuarioId) List~Meta~
+        +BuscarPorId(id, usuarioId) Meta
+        +Agregar(meta) int
+        +Actualizar(meta)
+        +Eliminar(id, usuarioId)
+    }
+
+    class RepositorioDeudasPostgres {
+        +ListarPorUsuario(usuarioId) List~Deuda~
+        +BuscarPorId(id, usuarioId) Deuda
+        +Agregar(deuda) int
+        +Actualizar(deuda)
+        +Eliminar(id, usuarioId)
+    }
+
+    class RepositorioPresupuestosPostgres {
+        +ListarPorUsuario(usuarioId) List~Presupuesto~
+        +ListarPorPeriodo(usuarioId, anio, mes) List~Presupuesto~
+        +BuscarPorCategoria(usuarioId, anio, mes, categoria) Presupuesto
+        +Guardar(presupuesto) int
+        +Eliminar(id, usuarioId) bool
+    }
+
+    class RepositorioActividadPostgres {
+        +Registrar(usuarioId, accion)
+        +ListarRecientes(usuarioId, limite) List~RegistroActividad~
+    }
+
+    class RepositorioAuditoriaPostgres {
+        +Registrar(administradorId, accion, detalle)
+        +ListarRecientes(limite) List~RegistroAuditoria~
+    }
+
+    class ConexionBD {
+        +string CadenaConexion
+        +Abrir() NpgsqlConnection
+        +Probar()
+        +LeerCadenaConexion() string$
+    }
+
+    class ConvertidorDatos {
+        <<static>>
+        +Texto(valor) string$
+        +Entero(valor) int$
+        +Numero(valor) decimal$
+        +Booleano(valor) bool$
+        +Fecha(valor) DateTime$
+        +Bytes(valor) byte[]$
+        +FechaONulo(valor) object$
+        +RolATexto(rol) string$
+        +TextoARol(texto) RolUsuario$
+        +PrioridadATexto(prioridad) string$
+        +TextoAPrioridad(texto) PrioridadMeta$
+        +TemaATexto(tema) string$
+        +TextoATema(texto) TemaVisual$
+    }
+
+    class IRepositorioAutenticacion {
+        <<interface>>
+    }
+    class IRepositorioPerfil {
+        <<interface>>
+    }
+    class IRepositorioAdministracion {
+        <<interface>>
+    }
+    class IRepositorioSobres {
+        <<interface>>
+    }
+    class IRepositorioMovimientos {
+        <<interface>>
+    }
+    class IRepositorioMetas {
+        <<interface>>
+    }
+    class IRepositorioDeudas {
+        <<interface>>
+    }
+    class IRepositorioPresupuestos {
+        <<interface>>
+    }
+    class IRepositorioActividad {
+        <<interface>>
+    }
+    class IRepositorioAuditoria {
+        <<interface>>
+    }
+
+    class Usuario {
+        <<entidad>>
+    }
+    class Sobre {
+        <<entidad>>
+    }
+    class Movimiento {
+        <<entidad>>
+    }
+    class Meta {
+        <<entidad>>
+    }
+    class Deuda {
+        <<entidad>>
+    }
+    class Presupuesto {
+        <<entidad>>
+    }
+    class FiltroMovimientos {
+        <<consulta>>
+    }
+    class RegistroActividad {
+        <<entidad>>
+    }
+    class RegistroAuditoria {
+        <<entidad>>
+    }
+
+    RepositorioUsuariosPostgres ..|> IRepositorioAutenticacion
+    RepositorioUsuariosPostgres ..|> IRepositorioPerfil
+    RepositorioUsuariosPostgres ..|> IRepositorioAdministracion
+    RepositorioSobresPostgres ..|> IRepositorioSobres
+    RepositorioMovimientosPostgres ..|> IRepositorioMovimientos
+    RepositorioMetasPostgres ..|> IRepositorioMetas
+    RepositorioDeudasPostgres ..|> IRepositorioDeudas
+    RepositorioPresupuestosPostgres ..|> IRepositorioPresupuestos
+    RepositorioActividadPostgres ..|> IRepositorioActividad
+    RepositorioAuditoriaPostgres ..|> IRepositorioAuditoria
+
+    RepositorioUsuariosPostgres ..> Usuario : mapea
+    RepositorioSobresPostgres ..> Sobre : mapea
+    RepositorioMovimientosPostgres ..> Movimiento : mapea
+    RepositorioMovimientosPostgres ..> FiltroMovimientos : recibe
+    RepositorioMetasPostgres ..> Meta : mapea
+    RepositorioDeudasPostgres ..> Deuda : mapea
+    RepositorioPresupuestosPostgres ..> Presupuesto : mapea
+    RepositorioActividadPostgres ..> RegistroActividad : mapea
+    RepositorioAuditoriaPostgres ..> RegistroAuditoria : mapea
+
+    RepositorioUsuariosPostgres ..> ConexionBD : abre
+    RepositorioSobresPostgres ..> ConexionBD : abre
+    RepositorioMovimientosPostgres ..> ConexionBD : abre
+    RepositorioMetasPostgres ..> ConexionBD : abre
+    RepositorioDeudasPostgres ..> ConexionBD : abre
+    RepositorioPresupuestosPostgres ..> ConexionBD : abre
+    RepositorioActividadPostgres ..> ConexionBD : abre
+    RepositorioAuditoriaPostgres ..> ConexionBD : abre
+
+    note for ConexionBD "Lee FINOPTIMA_CONEXION, luego conexion.txt y por ultimo localhost:5433 base finoptima."
+    note for ConvertidorDatos "Todos los repositorios convierten valores nulos y enums con esta clase."
+```

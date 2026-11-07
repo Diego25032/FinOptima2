@@ -1,0 +1,206 @@
+```mermaid
+%%{init: {'class': {'padding': 20}, 'flowchart': {'nodeSpacing': 80, 'rankSpacing': 100}}}%%
+classDiagram
+direction LR %% Change to TB for top-to-bottom layout
+
+class FormContrasena {
+    -servicios: FabricaServicios
+    -campoActual: TextBox
+    -campoNueva: TextBox
+    -campoConfirmacion: TextBox
+    -ConstruirInterfaz()
+    -AlGuardar(remitente: object, argumentos: EventArgs)
+    -AlCancelar(remitente: object, argumentos: EventArgs)
+}
+
+class FormDeuda {
+    -servicios: FabricaServicios
+    -deudaEditada: Deuda
+    -campoAcreedor: TextBox
+    -campoCapital: NumericUpDown
+    -campoSaldo: NumericUpDown
+    -campoTasa: NumericUpDown
+    -campoPagoMinimo: NumericUpDown
+    -campoFecha: DateTimePicker
+    -ConstruirInterfaz()
+    -CrearNumero(x: int, y: int, maximo: decimal) NumericUpDown
+    -CargarDatos()
+    -AlGuardar(remitente: object, argumentos: EventArgs)
+    -AlCancelar(remitente: object, argumentos: EventArgs)
+}
+
+class FormRegistro {
+    -servicios: FabricaServicios
+    -campoNombre: TextBox
+    -campoCorreo: TextBox
+    -campoContrasena: TextBox
+    -campoConfirmacion: TextBox
+    -correoRegistrado: string
+    +CorreoRegistrado: string
+    -ConstruirInterfaz()
+    -AlRegistrar(remitente: object, argumentos: EventArgs)
+    -AlCancelar(remitente: object, argumentos: EventArgs)
+}
+
+class FormAdministracion {
+    -servicios: FabricaServicios
+    -valorCuentas: Label
+    -valorAdministradores: Label
+    -valorUsuarios: Label
+    -valorActivas: Label
+    -valorInactivas: Label
+    -grillaCuentas: DataGridView
+    -grillaAuditoria: DataGridView
+    -ConstruirInterfaz()
+    -ConstruirResumen(pagina: TabPage)
+    -AgregarTarjeta(pagina: TabPage, titulo: string, x: int, y: int, acento: Color) Label
+    -ConstruirCuentas(pagina: TabPage)
+    -ConstruirAuditoria(pagina: TabPage)
+    -ConstruirInformacion(pagina: TabPage)
+    -CargarResumen()
+    -CargarCuentas()
+    -CargarAuditoria()
+    -AlActualizarResumen(remitente: object, argumentos: EventArgs)
+    -AlActualizarCuentas(remitente: object, argumentos: EventArgs)
+    -AlActualizarAuditoria(remitente: object, argumentos: EventArgs)
+    -AlCambiarRol(remitente: object, argumentos: EventArgs)
+    -AlCambiarEstado(remitente: object, argumentos: EventArgs)
+    -AlExportarCuentas(remitente: object, argumentos: EventArgs)
+    -ObtenerCuenta() Usuario
+    -NombreRol(rol: RolUsuario) string$
+    -EstadoTexto(activo: bool) string$
+}
+
+class FormMonto {
+    -campoMonto: NumericUpDown
+    +Monto: decimal
+    -AlAceptar(remitente: object, argumentos: EventArgs)
+    -AlCancelar(remitente: object, argumentos: EventArgs)
+}
+
+class FormPrincipal {
+    -servicios: FabricaServicios
+    -panelContenido: Panel
+    -panelMenu: Panel
+    -etiquetaUsuario: Label
+    -iconoNotificacion: NotifyIcon
+    -cerroSesion: bool
+    +CerroSesion: bool
+    -ConstruirInterfaz()
+    -AgregarBotonMenu(texto: string, clave: string, posicion: int)
+    -AlElegirModulo(remitente: object, argumentos: EventArgs)
+    -MostrarModulo(modulo: UserControl)
+    -AlCambiarPerfil(remitente: object, argumentos: EventArgs)
+    -AlCerrarSesion(remitente: object, argumentos: EventArgs)
+    -PrepararNotificaciones()
+    #OnFormClosed(e: FormClosedEventArgs)
+    -NombreRol() string
+}
+
+class FormMovimiento {
+    -servicios: FabricaServicios
+    -movimientoEditado: Movimiento
+    -identificadoresSobre: List~int~
+    -campoFecha: DateTimePicker
+    -campoTipo: ComboBox
+    -campoCategoria: TextBox
+    -campoDescripcion: TextBox
+    -campoMonto: NumericUpDown
+    -campoSobre: ComboBox
+    -ConstruirInterfaz()
+    -CargarSobres()
+    -CargarDatos()
+    -AlGuardar(remitente: object, argumentos: EventArgs)
+    -AlCancelar(remitente: object, argumentos: EventArgs)
+}
+
+class FormLogin {
+    -servicios: FabricaServicios
+    -campoCorreo: TextBox
+    -campoContrasena: TextBox
+    -etiquetaEstadoCon: Label
+    -principalCerroSesion: bool
+    -ConstruirInterfaz()
+    #OnShown(e: EventArgs)
+    -ProbarConexion()
+    -AlIniciarSesion(remitente: object, argumentos: EventArgs)
+    -AlCrearCuenta(remitente: object, argumentos: EventArgs)
+    -AbrirPrincipal()
+}
+
+class FormMeta {
+    -servicios: FabricaServicios
+    -metaEditada: Meta
+    -campoNombre: TextBox
+    -campoObjetivo: NumericUpDown
+    -campoActual: NumericUpDown
+    -campoFecha: DateTimePicker
+    -campoPrioridad: ComboBox
+    -ConstruirInterfaz()
+    -CrearNumero(x: int, y: int) NumericUpDown
+    -CargarDatos()
+    -AlGuardar(remitente: object, argumentos: EventArgs)
+    -AlCancelar(remitente: object, argumentos: EventArgs)
+}
+
+class FormPresupuesto {
+    -servicios: FabricaServicios
+    -resumenEditado: PresupuestoResumen
+    -campoCategoria: TextBox
+    -campoLimite: NumericUpDown
+    -ConstruirInterfaz()
+    -CargarDatos()
+    -AlGuardar(remitente: object, argumentos: EventArgs)
+    -AlCancelar(remitente: object, argumentos: EventArgs)
+}
+
+class Program {
+    <<static>>
+    ~Main()$
+}
+
+class FormSobre {
+    -servicios: FabricaServicios
+    -sobreEditado: Sobre
+    -campoNombre: TextBox
+    -campoTipo: ComboBox
+    -campoObjetivo: NumericUpDown
+    -campoMinimo: NumericUpDown
+    -campoMaximo: NumericUpDown
+    -campoDescripcion: TextBox
+    -ConstruirInterfaz()
+    -CrearNumero(x: int, y: int, ancho: int) NumericUpDown
+    -CargarDatos()
+    -AlGuardar(remitente: object, argumentos: EventArgs)
+    -AlCancelar(remitente: object, argumentos: EventArgs)
+}
+
+class Form
+
+
+Form <|-- FormContrasena : inherit
+Form <|-- FormDeuda : inherit
+Form <|-- FormRegistro : inherit
+Form <|-- FormAdministracion : inherit
+Form <|-- FormMonto : inherit
+Form <|-- FormPrincipal : inherit
+Form <|-- FormMovimiento : inherit
+Form <|-- FormLogin : inherit
+Form <|-- FormMeta : inherit
+Form <|-- FormPresupuesto : inherit
+Form <|-- FormSobre : inherit
+
+style FormContrasena fill:#d4eddaB3,stroke:#c3e6cbB3,color:#000000
+style FormDeuda fill:#d4eddaB3,stroke:#c3e6cbB3,color:#000000
+style FormRegistro fill:#d4eddaB3,stroke:#c3e6cbB3,color:#000000
+style FormAdministracion fill:#d4eddaB3,stroke:#c3e6cbB3,color:#000000
+style FormMonto fill:#d4eddaB3,stroke:#c3e6cbB3,color:#000000
+style FormPrincipal fill:#d4eddaB3,stroke:#c3e6cbB3,color:#000000
+style FormMovimiento fill:#d4eddaB3,stroke:#c3e6cbB3,color:#000000
+style FormLogin fill:#d4eddaB3,stroke:#c3e6cbB3,color:#000000
+style FormMeta fill:#d4eddaB3,stroke:#c3e6cbB3,color:#000000
+style FormPresupuesto fill:#d4eddaB3,stroke:#c3e6cbB3,color:#000000
+style Program fill:#d4eddaB3,stroke:#c3e6cbB3,color:#000000
+style FormSobre fill:#d4eddaB3,stroke:#c3e6cbB3,color:#000000
+style Form fill:#f0f0f080,stroke:#cccccc80,color:#00000080
+```

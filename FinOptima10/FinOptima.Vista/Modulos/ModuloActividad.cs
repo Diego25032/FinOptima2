@@ -20,15 +20,10 @@ namespace FinOptima.Vista.Modulos
 
         private void ConstruirInterfaz()
         {
-            Label nota = new Label();
-            nota.Text = "Ultimas acciones registradas en tu cuenta.";
-            nota.Location = new Point(Margen, 55);
-            nota.AutoSize = true;
-            nota.ForeColor = Color.FromArgb(90, 100, 115);
-            Controls.Add(nota);
+            Controls.Add(UtilidadesVista.CrearNota("Ultimas acciones registradas en tu cuenta.", Margen, 55, 880));
 
             grilla = new DataGridView();
-            grilla.Location = new Point(Margen, 85);
+            grilla.Location = new Point(Margen, 88);
             grilla.Size = new Size(900, 420);
             grilla.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             UtilidadesVista.PrepararGrilla(grilla);

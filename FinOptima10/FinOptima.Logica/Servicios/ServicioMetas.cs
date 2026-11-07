@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using FinOptima.Datos.Contratos;
 using FinOptima.Entidades.Entidades;
-using FinOptima.Logica.Errores;
 using FinOptima.Logica.Modelos;
 using FinOptima.Logica.Utilidades;
 using FinOptima.Logica.Validaciones;
@@ -24,7 +23,7 @@ namespace FinOptima.Logica.Servicios
         {
             List<MetaResumen> resumenes = new List<MetaResumen>();
 
-            foreach (Meta meta in metas.ListarPorUsuario(UsuarioId()))
+            foreach (Meta meta in metas.ListarPorUsuario(ValidadorSesion.UsuarioId(sesion)))
             {
                 resumenes.Add(CalculadoraResumenes.CrearMetaResumen(meta, DateTime.Today));
             }
@@ -42,7 +41,7 @@ namespace FinOptima.Logica.Servicios
                 return Resultado.Mal(validacion.Mensaje);
             }
 
-            meta.UsuarioId = UsuarioId();
+            meta.UsuarioId = ValidadorSesion.UsuarioId(sesion);
 
             if (esNueva)
             {
@@ -69,7 +68,7 @@ namespace FinOptima.Logica.Servicios
                 return Resultado.Mal("El aporte debe ser mayor que cero.");
             }
 
-            int usuarioId = UsuarioId();
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
             Meta meta = metas.BuscarPorId(metaId, usuarioId);
 
             if (meta == null)
@@ -102,7 +101,7 @@ namespace FinOptima.Logica.Servicios
 
         public Resultado Eliminar(int identificador)
         {
-            int usuarioId = UsuarioId();
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
             Meta meta = metas.BuscarPorId(identificador, usuarioId);
 
             if (meta == null)
@@ -118,22 +117,12 @@ namespace FinOptima.Logica.Servicios
         {
             decimal total = 0;
 
-            foreach (Meta meta in metas.ListarPorUsuario(UsuarioId()))
+            foreach (Meta meta in metas.ListarPorUsuario(ValidadorSesion.UsuarioId(sesion)))
             {
                 total = total + meta.MontoActual;
             }
 
             return total;
-        }
-
-        private int UsuarioId()
-        {
-            if (!sesion.HaySesion)
-            {
-                throw new ErrorAplicacion("No hay una sesion activa.");
-            }
-
-            return sesion.UsuarioId;
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using FinOptima.Logica.Composicion;
 using FinOptima.Logica.Modelos;
+using FinOptima.Vista.Temas;
 using FinOptima.Vista.Utilidades;
 
 namespace FinOptima.Vista.Modulos
@@ -30,7 +31,7 @@ namespace FinOptima.Vista.Modulos
             etiquetaMes = new Label();
             etiquetaMes.Location = new Point(Margen, 55);
             etiquetaMes.AutoSize = true;
-            etiquetaMes.ForeColor = Color.FromArgb(90, 100, 115);
+            etiquetaMes.ForeColor = TemaActual.Actual.TextoSecundario;
             Controls.Add(etiquetaMes);
 
             tarjetaIngresos = UtilidadesVista.CrearTarjeta("Ingresos del mes", Margen, 88, 250, 78, Acento);
@@ -55,6 +56,7 @@ namespace FinOptima.Vista.Modulos
             rotuloSobres.Location = new Point(Margen, 318);
             rotuloSobres.AutoSize = true;
             rotuloSobres.Font = new Font("Segoe UI", Letra + 2, FontStyle.Bold);
+            rotuloSobres.ForeColor = TemaActual.Actual.Texto;
             Controls.Add(rotuloSobres);
 
             grillaSobres = new DataGridView();
@@ -74,6 +76,7 @@ namespace FinOptima.Vista.Modulos
             rotuloAlertas.Location = new Point(Margen, 558);
             rotuloAlertas.AutoSize = true;
             rotuloAlertas.Font = new Font("Segoe UI", Letra + 2, FontStyle.Bold);
+            rotuloAlertas.ForeColor = TemaActual.Actual.Texto;
             Controls.Add(rotuloAlertas);
 
             grillaAlertas = new DataGridView();

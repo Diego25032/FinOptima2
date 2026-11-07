@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using FinOptima.Logica.Composicion;
 using FinOptima.Logica.Modelos;
+using FinOptima.Vista.Temas;
 using FinOptima.Vista.Utilidades;
 
 namespace FinOptima.Vista.Modulos
@@ -21,16 +22,14 @@ namespace FinOptima.Vista.Modulos
 
         private void ConstruirInterfaz()
         {
-            Label nota = new Label();
-            nota.Text = "Avisos sobre metas, deudas, presupuestos y sobres segun tus preferencias.";
-            nota.Location = new Point(Margen, 55);
-            nota.AutoSize = true;
-            nota.ForeColor = Color.FromArgb(90, 100, 115);
+            Label nota = UtilidadesVista.CrearNota(
+                "Avisos sobre metas, deudas, presupuestos y sobres segun tus preferencias.",
+                Margen, 55, 880);
             Controls.Add(nota);
 
             grilla = new DataGridView();
-            grilla.Location = new Point(Margen, 85);
-            grilla.Size = new Size(940, 420);
+            grilla.Location = new Point(Margen, 88);
+            grilla.Size = new Size(900, 415);
             grilla.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             UtilidadesVista.PrepararGrilla(grilla);
             grilla.Columns.Add("Nivel", "Nivel");
@@ -42,7 +41,7 @@ namespace FinOptima.Vista.Modulos
             resumen = new Label();
             resumen.Location = new Point(Margen, 520);
             resumen.AutoSize = true;
-            resumen.ForeColor = Color.FromArgb(90, 100, 115);
+            resumen.ForeColor = TemaActual.Actual.TextoSecundario;
             Controls.Add(resumen);
 
             Button actualizar = BotonSecundario("Actualizar", Margen, 550, 130);
@@ -63,7 +62,7 @@ namespace FinOptima.Vista.Modulos
 
                     if (alerta.Nivel == "Alta")
                     {
-                        grilla.Rows[indice].DefaultCellStyle.ForeColor = Color.FromArgb(178, 60, 60);
+                        grilla.Rows[indice].DefaultCellStyle.ForeColor = TemaActual.Actual.Peligro;
                     }
                 }
 

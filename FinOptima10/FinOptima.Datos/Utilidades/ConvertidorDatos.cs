@@ -111,6 +111,36 @@ namespace FinOptima.Datos.Utilidades
             return RolUsuario.Usuario;
         }
 
+        public static TemaVisual TextoATema(string texto)
+        {
+            if (texto != null && texto.Equals("Oscuro", StringComparison.OrdinalIgnoreCase))
+            {
+                return TemaVisual.Oscuro;
+            }
+
+            if (texto != null && texto.Equals("Contraste", StringComparison.OrdinalIgnoreCase))
+            {
+                return TemaVisual.Contraste;
+            }
+
+            return TemaVisual.Claro;
+        }
+
+        public static string TemaATexto(TemaVisual tema)
+        {
+            if (tema == TemaVisual.Oscuro)
+            {
+                return "Oscuro";
+            }
+
+            if (tema == TemaVisual.Contraste)
+            {
+                return "Contraste";
+            }
+
+            return "Claro";
+        }
+
         public static string PrioridadATexto(PrioridadMeta prioridad)
         {
             if (prioridad == PrioridadMeta.Alta)

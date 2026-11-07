@@ -1,0 +1,160 @@
+```mermaid
+%% FinOptima - respaldos, reportes, exportacion y errores (capa Datos)
+classDiagram
+    direction LR
+
+    class ServicioRespaldoJson {
+        +Exportar(usuarioId, correo, ruta) ResumenRespaldoDatos
+        +Importar(usuarioId, ruta) ResumenRespaldoDatos
+    }
+
+    class RespaldoArchivo {
+        <<privada>>
+        +int Version
+        +DateTime ExportadoEn
+        +string Correo
+        +Sobres
+        +Movimientos
+        +Metas
+        +Deudas
+        +PrepararListas()
+    }
+
+    class SobreRespaldo {
+        <<privada>>
+        +int Id
+        +string Nombre
+        +int Tipo
+        +decimal PorcentajeObjetivo
+        +decimal Saldo
+        +bool Activo
+    }
+
+    class MovimientoRespaldo {
+        <<privada>>
+        +int Id
+        +int SobreId
+        +int Tipo
+        +string Categoria
+        +decimal Monto
+        +DateTime Fecha
+    }
+
+    class MetaRespaldo {
+        <<privada>>
+        +int Id
+        +string Nombre
+        +decimal MontoObjetivo
+        +decimal MontoActual
+        +DateTime FechaLimite
+        +int Prioridad
+    }
+
+    class DeudaRespaldo {
+        <<privada>>
+        +int Id
+        +string Acreedor
+        +decimal Capital
+        +decimal Saldo
+        +decimal TasaInteres
+        +decimal PagoMinimo
+        +DateTime FechaVencimiento
+    }
+
+    class ResumenRespaldoDatos {
+        +int Sobres
+        +int Movimientos
+        +int Metas
+        +int Deudas
+        +int Total
+    }
+
+    class GeneradorReportes {
+        +ExportarExcel(ruta, sobres, movimientos, metas, deudas)
+        +ExportarPdf(ruta, nombreUsuario, sobres, movimientos, metas, deudas)
+    }
+
+    class LienzoPdf {
+        <<privada>>
+        +Escribir(texto, fuente)
+        +Guardar(ruta)
+    }
+
+    class ExportadorCuentasCsv {
+        +Exportar(usuarios, ruta)
+    }
+
+    class ErrorBaseDatos {
+        <<exception>>
+        +ErrorBaseDatos(mensaje)
+        +ErrorBaseDatos(mensaje, errorInterno)
+    }
+
+    class ErrorRespaldo {
+        <<exception>>
+        +ErrorRespaldo(mensaje)
+        +ErrorRespaldo(mensaje, errorInterno)
+    }
+
+    class IServicioRespaldo {
+        <<interface>>
+    }
+    class IGeneradorReportes {
+        <<interface>>
+    }
+    class IExportadorCuentas {
+        <<interface>>
+    }
+    class ConexionBD {
+        <<datos>>
+    }
+    class ConvertidorDatos {
+        <<static>>
+    }
+    class Exception {
+        <<sistema>>
+    }
+    class Usuario {
+        <<entidad>>
+    }
+    class Sobre {
+        <<entidad>>
+    }
+    class Movimiento {
+        <<entidad>>
+    }
+    class Meta {
+        <<entidad>>
+    }
+    class Deuda {
+        <<entidad>>
+    }
+
+    ServicioRespaldoJson ..|> IServicioRespaldo
+    GeneradorReportes ..|> IGeneradorReportes
+    ExportadorCuentasCsv ..|> IExportadorCuentas
+
+    ServicioRespaldoJson *-- RespaldoArchivo : contiene
+    RespaldoArchivo *-- SobreRespaldo : sobres
+    RespaldoArchivo *-- MovimientoRespaldo : movimientos
+    RespaldoArchivo *-- MetaRespaldo : metas
+    RespaldoArchivo *-- DeudaRespaldo : deudas
+
+    ServicioRespaldoJson ..> ConexionBD : abre
+    ServicioRespaldoJson ..> ConvertidorDatos : convierte
+    ServicioRespaldoJson ..> ResumenRespaldoDatos : devuelve
+    ServicioRespaldoJson ..> ErrorRespaldo : lanza
+    GeneradorReportes *-- LienzoPdf : usa
+    GeneradorReportes ..> ErrorBaseDatos : lanza
+    GeneradorReportes ..> Sobre : lee
+    GeneradorReportes ..> Movimiento : lee
+    GeneradorReportes ..> Meta : lee
+    GeneradorReportes ..> Deuda : lee
+    ExportadorCuentasCsv ..> Usuario : lee
+
+    ErrorBaseDatos --|> Exception : hereda
+    ErrorRespaldo --|> Exception : hereda
+
+    note for ServicioRespaldoJson "Exporta a JSON e importa con transaccion: si algo falla, no deja datos a medias."
+    note for GeneradorReportes "El Excel usa ClosedXML y el PDF usa PdfSharp; LienzoPdf es una clase privada de apoyo."
+```

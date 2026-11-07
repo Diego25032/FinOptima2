@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using FinOptima.Datos.Contratos;
 using FinOptima.Entidades.Entidades;
 using FinOptima.Entidades.Enums;
-using FinOptima.Logica.Errores;
 using FinOptima.Logica.Modelos;
+using FinOptima.Logica.Validaciones;
 using FinOptima.Logica.Utilidades;
 
 namespace FinOptima.Logica.Servicios
@@ -30,7 +30,7 @@ namespace FinOptima.Logica.Servicios
 
         public List<Alerta> Listar()
         {
-            int usuarioId = UsuarioId();
+            int usuarioId = ValidadorSesion.UsuarioId(sesion);
             DateTime hoy = DateTime.Today;
             List<Alerta> alertas = new List<Alerta>();
             Usuario usuario = sesion.Usuario;
@@ -167,16 +167,6 @@ namespace FinOptima.Logica.Servicios
                         "Baja"));
                 }
             }
-        }
-
-        private int UsuarioId()
-        {
-            if (!sesion.HaySesion)
-            {
-                throw new ErrorAplicacion("No hay una sesion activa.");
-            }
-
-            return sesion.UsuarioId;
         }
     }
 }

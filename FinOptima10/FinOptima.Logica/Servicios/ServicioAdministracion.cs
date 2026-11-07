@@ -9,12 +9,12 @@ namespace FinOptima.Logica.Servicios
 {
     public class ServicioAdministracion
     {
-        private IRepositorioUsuarios usuarios;
+        private IRepositorioAdministracion usuarios;
         private IRepositorioAuditoria auditoria;
         private IExportadorCuentas exportador;
         private SesionActual sesion;
 
-        public ServicioAdministracion(IRepositorioUsuarios repositorioUsuarios, IRepositorioAuditoria repositorioAuditoria, IExportadorCuentas exportadorCuentas, SesionActual sesionActual)
+        public ServicioAdministracion(IRepositorioAdministracion repositorioUsuarios, IRepositorioAuditoria repositorioAuditoria, IExportadorCuentas exportadorCuentas, SesionActual sesionActual)
         {
             usuarios = repositorioUsuarios;
             auditoria = repositorioAuditoria;

@@ -5,6 +5,7 @@ using FinOptima.Entidades.Entidades;
 using FinOptima.Entidades.Enums;
 using FinOptima.Logica.Composicion;
 using FinOptima.Logica.Modelos;
+using FinOptima.Vista.Temas;
 using FinOptima.Vista.Utilidades;
 
 namespace FinOptima.Vista
@@ -30,13 +31,10 @@ namespace FinOptima.Vista
         private void ConstruirInterfaz()
         {
             Text = "Meta financiera";
-            StartPosition = FormStartPosition.CenterParent;
-            ClientSize = new Size(470, 350);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
-            BackColor = Color.White;
-            Font = new Font("Segoe UI", 10);
+            ClientSize = new Size(470, 350);
 
             Controls.Add(UtilidadesVista.CrearEtiqueta("Nombre de la meta", 24, 20));
             campoNombre = UtilidadesVista.CrearCampo(24, 42, 408);
@@ -55,28 +53,29 @@ namespace FinOptima.Vista
             campoFecha.Location = new Point(24, 162);
             campoFecha.Width = 180;
             campoFecha.Format = DateTimePickerFormat.Short;
+            UtilidadesVista.AplicarEstiloCampo(campoFecha);
             Controls.Add(campoFecha);
 
             Controls.Add(UtilidadesVista.CrearEtiqueta("Prioridad", 232, 140));
-            campoPrioridad = new ComboBox();
-            campoPrioridad.Location = new Point(232, 162);
-            campoPrioridad.Width = 150;
-            campoPrioridad.DropDownStyle = ComboBoxStyle.DropDownList;
+            campoPrioridad = UtilidadesVista.CrearLista(232, 162, 150);
             campoPrioridad.Items.Add(PrioridadMeta.Baja);
             campoPrioridad.Items.Add(PrioridadMeta.Media);
             campoPrioridad.Items.Add(PrioridadMeta.Alta);
             Controls.Add(campoPrioridad);
 
-            Button guardar = UtilidadesVista.CrearBoton("Guardar", 24, 260, 190, 38, Color.FromArgb(47, 111, 237));
+            Button guardar = UtilidadesVista.CrearBoton("Guardar", 24, 260, 190, 38, TemaActual.Acento);
             guardar.Click += AlGuardar;
             Controls.Add(guardar);
 
-            Button cancelar = UtilidadesVista.CrearBoton("Cancelar", 244, 260, 190, 38, Color.FromArgb(90, 100, 115));
+            Button cancelar = UtilidadesVista.CrearBotonSecundario("Cancelar", 244, 260, 190, 38);
             cancelar.Click += AlCancelar;
             Controls.Add(cancelar);
 
             AcceptButton = guardar;
             CancelButton = cancelar;
+
+            UtilidadesVista.PrepararFormulario(this);
+            UtilidadesVista.EstilizarCampos(this);
         }
 
         private NumericUpDown CrearNumero(int x, int y)
@@ -87,6 +86,7 @@ namespace FinOptima.Vista
             numero.DecimalPlaces = 2;
             numero.Maximum = 1000000000;
             numero.Increment = 10000;
+            UtilidadesVista.AplicarEstiloCampo(numero);
             return numero;
         }
 

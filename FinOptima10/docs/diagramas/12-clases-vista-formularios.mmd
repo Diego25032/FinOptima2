@@ -1,0 +1,186 @@
+```mermaid
+%% FinOptima - formularios de la capa Vista
+classDiagram
+    direction LR
+
+    class Program {
+        <<static>>
+        +Main()
+    }
+
+    class FormLogin {
+        +FormLogin(fabrica)
+    }
+
+    class FormRegistro {
+        +FormRegistro(fabrica)
+    }
+
+    class FormPrincipal {
+        -ComboBox selectorTema
+        -string claveModuloActual
+        +FormPrincipal(fabrica)
+        -AlCambiarTema(remitente, argumentos)
+        -ReconstruirInterfaz()
+    }
+
+    class FormAdministracion {
+        +FormAdministracion(fabrica)
+    }
+
+    class FormSobre {
+        +FormSobre(fabrica, sobre)
+    }
+
+    class FormMovimiento {
+        +FormMovimiento(fabrica, movimiento)
+    }
+
+    class FormMeta {
+        +FormMeta(fabrica, meta)
+    }
+
+    class FormDeuda {
+        +FormDeuda(fabrica, deuda)
+    }
+
+    class FormPresupuesto {
+        +FormPresupuesto(fabrica, resumen, anio, mes)
+    }
+
+    class FormContrasena {
+        +FormContrasena(fabrica)
+    }
+
+    class FormMonto {
+        +FormMonto(titulo, descripcion, maximo)
+    }
+
+    class Form {
+        <<WinForms>>
+    }
+
+    class UtilidadesVista {
+        <<static>>
+        +PrepararGrilla(grilla)$
+        +PrepararFormulario(formulario)$
+        +EstilizarCampos(contenedor)$
+        +EstilizarCampo(control)$
+        +AplicarEstiloCampo(campo)$
+        +CrearEtiqueta(texto, x, y, ancho) Label$
+        +CrearNota(texto, x, y, ancho) Label$
+        +CrearTitulo(texto, x, y) Label$
+        +CrearValor(texto, x, y) Label$
+        +CrearCampo(x, y, ancho) TextBox$
+        +CrearLista(x, y, ancho) ComboBox$
+        +CrearBoton(texto, x, y, ancho, alto, color) Button$
+        +CrearBotonSecundario(texto, x, y, ancho, alto) Button$
+        +CrearBotonPeligro(texto, x, y, ancho, alto) Button$
+        +CrearTarjeta(titulo, x, y, ancho, alto, acento) Panel$
+        +PonerValor(tarjeta, texto)$
+        +ColorContraste(fondo) Color$
+        +ColorDesdeTexto(texto) Color$
+        +Moneda(monto) string$
+        +MonedaCorta(monto) string$
+        +Porcentaje(valor) string$
+        +Informar(mensaje)$
+        +AvisarError(mensaje)$
+        +Confirmar(mensaje) bool$
+    }
+
+    class TemaActual {
+        <<static>>
+        +Tema Actual
+        +Color Acento
+        +Cambiar(tema)
+        +Cambiar(visual)
+    }
+
+    class CatalogoTemas {
+        <<static>>
+        +Listar() List~Tema~
+        +Buscar(visual) Tema
+    }
+
+    class FabricaServicios {
+        <<composicion>>
+    }
+
+    class ServicioAutenticacion {
+        <<servicio>>
+    }
+    class ServicioDashboard {
+        <<servicio>>
+    }
+    class ServicioAdministracion {
+        <<servicio>>
+    }
+    class ServicioSobres {
+        <<servicio>>
+    }
+    class ServicioMovimientos {
+        <<servicio>>
+    }
+    class ServicioMetas {
+        <<servicio>>
+    }
+    class ServicioDeudas {
+        <<servicio>>
+    }
+    class ServicioPresupuestos {
+        <<servicio>>
+    }
+    class ServicioPerfil {
+        <<servicio>>
+    }
+
+    Form <|-- FormLogin
+    Form <|-- FormRegistro
+    Form <|-- FormPrincipal
+    Form <|-- FormAdministracion
+    Form <|-- FormSobre
+    Form <|-- FormMovimiento
+    Form <|-- FormMeta
+    Form <|-- FormDeuda
+    Form <|-- FormPresupuesto
+    Form <|-- FormContrasena
+    Form <|-- FormMonto
+
+    Program ..> FormLogin : inicia
+    FormLogin ..> FormRegistro : abre
+    FormLogin ..> FormPrincipal : abre
+    FormPrincipal ..> FormAdministracion : abre
+
+    FormLogin ..> FabricaServicios : recibe
+    FormRegistro ..> FabricaServicios : recibe
+    FormPrincipal ..> FabricaServicios : recibe
+    FormAdministracion ..> FabricaServicios : recibe
+    FormSobre ..> FabricaServicios : recibe
+    FormMovimiento ..> FabricaServicios : recibe
+    FormMeta ..> FabricaServicios : recibe
+    FormDeuda ..> FabricaServicios : recibe
+    FormPresupuesto ..> FabricaServicios : recibe
+    FormContrasena ..> FabricaServicios : recibe
+
+    FormLogin ..> ServicioAutenticacion : usa
+    FormRegistro ..> ServicioAutenticacion : usa
+    FormPrincipal ..> ServicioAutenticacion : usa
+    FormPrincipal ..> ServicioDashboard : usa
+    FormAdministracion ..> ServicioAdministracion : usa
+    FormSobre ..> ServicioSobres : usa
+    FormMovimiento ..> ServicioMovimientos : usa
+    FormMovimiento ..> ServicioSobres : consulta
+    FormMeta ..> ServicioMetas : usa
+    FormDeuda ..> ServicioDeudas : usa
+    FormPresupuesto ..> ServicioPresupuestos : usa
+    FormContrasena ..> ServicioPerfil : usa
+    FormPrincipal ..> CatalogoTemas : lista temas
+    FormPrincipal ..> TemaActual : cambia tema
+    FormPrincipal ..> ServicioPerfil : guarda tema
+    UtilidadesVista ..> TemaActual : lee colores
+
+    note for Program "ApplicationConfiguration.Initialize() y Application.Run(new FormLogin(fabrica))."
+    note for FormMonto "Formulario reutilizable para pedir un monto: lo usan metas, deudas y movimientos."
+    note for FormPrincipal "Muestra los modulos segun el rol, contiene el menu lateral y el selector de tema."
+    note for UtilidadesVista "La usan todos los formularios y modulos para grillas, tarjetas, controles, moneda, avisos y confirmaciones."
+```

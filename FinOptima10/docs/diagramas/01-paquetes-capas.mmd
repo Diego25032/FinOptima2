@@ -1,0 +1,42 @@
+```mermaid
+%% FinOptima - vista general de paquetes por capa
+%% Regla de dependencia: Vista -> Logica -> Datos -> Entidades
+flowchart TB
+    subgraph vista["FinOptima.Vista"]
+        V["Presentacion WinForms\n11 formularios\n13 modulos\nUtilidadesVista\ntemas visuales"]
+    end
+    subgraph logica["FinOptima.Logica"]
+        L["Reglas de negocio\n15 servicios\n6 validadores\nseguridad, modelos y composicion"]
+    end
+    subgraph datos["FinOptima.Datos"]
+        D["Acceso a datos\n13 contratos\n8 repositorios PostgreSQL\nrespaldos, reportes y exportacion"]
+    end
+    subgraph entidades["FinOptima.Entidades"]
+        E["Modelo del dominio\n8 entidades\n5 enumeraciones"]
+    end
+    subgraph pruebas["FinOptima.Pruebas"]
+        P["Pruebas de consola\nrepositorios falsos"]
+    end
+    BD[("PostgreSQL\nbase finoptima")]
+
+    V -->|"usa servicios"| L
+    V -->|"lee entidades"| E
+    L -->|"depende de contratos"| D
+    L -->|"lee entidades"| E
+    D -->|"mapea filas a"| E
+    D -->|"Npgsql"| BD
+    P -->|"prueba"| L
+    P -.->|"implementa contratos"| D
+    P -->|"usa"| E
+
+    classDef vista fill:#dbeafe,stroke:#2563eb,color:#000
+    classDef logica fill:#dcfce7,stroke:#16a34a,color:#000
+    classDef datos fill:#fef3c7,stroke:#d97706,color:#000
+    classDef entidades fill:#f3e8ff,stroke:#9333ea,color:#000
+    classDef pruebas fill:#f1f5f9,stroke:#64748b,color:#000
+    class V vista
+    class L logica
+    class D datos
+    class E entidades
+    class P pruebas
+```

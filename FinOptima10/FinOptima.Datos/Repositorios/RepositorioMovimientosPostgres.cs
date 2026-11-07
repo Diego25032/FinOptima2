@@ -4,6 +4,7 @@ using FinOptima.Datos.Conexion;
 using FinOptima.Datos.Contratos;
 using FinOptima.Datos.Errores;
 using FinOptima.Datos.Utilidades;
+using FinOptima.Entidades.Consultas;
 using FinOptima.Entidades.Entidades;
 using Npgsql;
 
@@ -43,6 +44,91 @@ namespace FinOptima.Datos.Repositorios
             catch (NpgsqlException error)
             {
                 throw new ErrorBaseDatos("No se pudieron obtener los movimientos.", error);
+            }
+
+            return movimientos;
+        }
+
+        public List<Movimiento> ListarFiltrados(int usuarioId, FiltroMovimientos filtro)
+        {
+            List<Movimiento> movimientos = new List<Movimiento>();
+
+            try
+            {
+                using (NpgsqlConnection conexion = conexionBD.Abrir())
+                {
+                    List<string> condiciones = new List<string>();
+                    condiciones.Add("usuario_id = @usuario");
+
+                    if (filtro.Anio > 0)
+                    {
+                        condiciones.Add("extract(year from fecha) = @anio");
+                    }
+
+                    if (filtro.Mes > 0)
+                    {
+                        condiciones.Add("extract(month from fecha) = @mes");
+                    }
+
+                    if (filtro.Tipo != null)
+                    {
+                        condiciones.Add("tipo = @tipo");
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(filtro.Categoria))
+                    {
+                        condiciones.Add("lower(categoria) like lower(@categoria)");
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(filtro.Texto))
+                    {
+                        condiciones.Add("(lower(descripcion) like lower(@texto) or lower(categoria) like lower(@texto))");
+                    }
+
+                    string sql = "select * from movimientos where " + string.Join(" and ", condiciones) + " order by fecha desc, id desc";
+
+                    using (NpgsqlCommand comando = new NpgsqlCommand(sql, conexion))
+                    {
+                        comando.Parameters.AddWithValue("@usuario", usuarioId);
+
+                        if (filtro.Anio > 0)
+                        {
+                            comando.Parameters.AddWithValue("@anio", filtro.Anio);
+                        }
+
+                        if (filtro.Mes > 0)
+                        {
+                            comando.Parameters.AddWithValue("@mes", filtro.Mes);
+                        }
+
+                        if (filtro.Tipo != null)
+                        {
+                            comando.Parameters.AddWithValue("@tipo", (int)filtro.Tipo.Value);
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(filtro.Categoria))
+                        {
+                            comando.Parameters.AddWithValue("@categoria", "%" + filtro.Categoria.Trim() + "%");
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(filtro.Texto))
+                        {
+                            comando.Parameters.AddWithValue("@texto", "%" + filtro.Texto.Trim() + "%");
+                        }
+
+                        using (NpgsqlDataReader lector = comando.ExecuteReader())
+                        {
+                            while (lector.Read())
+                            {
+                                movimientos.Add(Mapear(lector));
+                            }
+                        }
+                    }
+                }
+            }
+            catch (NpgsqlException error)
+            {
+                throw new ErrorBaseDatos("No se pudieron filtrar los movimientos.", error);
             }
 
             return movimientos;

@@ -5,6 +5,7 @@ using FinOptima.Entidades.Entidades;
 using FinOptima.Entidades.Enums;
 using FinOptima.Logica.Composicion;
 using FinOptima.Logica.Modelos;
+using FinOptima.Vista.Temas;
 using FinOptima.Vista.Utilidades;
 
 namespace FinOptima.Vista
@@ -31,23 +32,17 @@ namespace FinOptima.Vista
         private void ConstruirInterfaz()
         {
             Text = "Sobre";
-            StartPosition = FormStartPosition.CenterParent;
-            ClientSize = new Size(470, 390);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
-            BackColor = Color.White;
-            Font = new Font("Segoe UI", 10);
+            ClientSize = new Size(470, 390);
 
             Controls.Add(UtilidadesVista.CrearEtiqueta("Nombre", 24, 20));
             campoNombre = UtilidadesVista.CrearCampo(24, 42, 410);
             Controls.Add(campoNombre);
 
             Controls.Add(UtilidadesVista.CrearEtiqueta("Tipo", 24, 80));
-            campoTipo = new ComboBox();
-            campoTipo.Location = new Point(24, 102);
-            campoTipo.Width = 200;
-            campoTipo.DropDownStyle = ComboBoxStyle.DropDownList;
+            campoTipo = UtilidadesVista.CrearLista(24, 102, 200);
             campoTipo.Items.Add(TipoSobre.Necesidades);
             campoTipo.Items.Add(TipoSobre.Ahorro);
             campoTipo.Items.Add(TipoSobre.Inversion);
@@ -70,23 +65,24 @@ namespace FinOptima.Vista
             Controls.Add(campoMaximo);
 
             Controls.Add(UtilidadesVista.CrearEtiqueta("Descripcion", 24, 204));
-            campoDescripcion = new TextBox();
-            campoDescripcion.Location = new Point(24, 226);
-            campoDescripcion.Width = 410;
+            campoDescripcion = UtilidadesVista.CrearCampo(24, 226, 410);
             campoDescripcion.Height = 60;
             campoDescripcion.Multiline = true;
             Controls.Add(campoDescripcion);
 
-            Button guardar = UtilidadesVista.CrearBoton("Guardar", 24, 315, 190, 38, Color.FromArgb(47, 111, 237));
+            Button guardar = UtilidadesVista.CrearBoton("Guardar", 24, 315, 190, 38, TemaActual.Acento);
             guardar.Click += AlGuardar;
             Controls.Add(guardar);
 
-            Button cancelar = UtilidadesVista.CrearBoton("Cancelar", 244, 315, 190, 38, Color.FromArgb(90, 100, 115));
+            Button cancelar = UtilidadesVista.CrearBotonSecundario("Cancelar", 244, 315, 190, 38);
             cancelar.Click += AlCancelar;
             Controls.Add(cancelar);
 
             AcceptButton = guardar;
             CancelButton = cancelar;
+
+            UtilidadesVista.PrepararFormulario(this);
+            UtilidadesVista.EstilizarCampos(this);
         }
 
         private NumericUpDown CrearNumero(int x, int y, int ancho)
@@ -98,6 +94,7 @@ namespace FinOptima.Vista
             numero.Minimum = 0;
             numero.Maximum = 100;
             numero.Increment = 1;
+            UtilidadesVista.AplicarEstiloCampo(numero);
             return numero;
         }
 

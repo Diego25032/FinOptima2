@@ -88,6 +88,8 @@ namespace FinOptima.Logica.Modelos
         public decimal Gastado { get; set; }
         public decimal Disponible { get; set; }
         public decimal Porcentaje { get; set; }
+        public int Anio { get; set; }
+        public int Mes { get; set; }
 
         public PresupuestoResumen()
         {
@@ -97,6 +99,8 @@ namespace FinOptima.Logica.Modelos
             Gastado = 0;
             Disponible = 0;
             Porcentaje = 0;
+            Anio = DateTime.Today.Year;
+            Mes = DateTime.Today.Month;
         }
     }
 
